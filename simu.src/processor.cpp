@@ -3,7 +3,7 @@ using namespace std;
 
 Processor::Processor(Memory* m): m(m) {
 	pc=0;
-	sp=0;
+	sp=MEMSIZE - 1;
 	a0=0;
 	a1=0;
 	for (int i=0; i<7; i++)
@@ -163,12 +163,23 @@ void Processor::von_Neuman_step(bool debug) {
 				int i;
 				for (i=0; i<size; i++)
 				{
-					read_bit_from_pc(var);
+					var = (var << 1) + m->read_bit(counter);
+					switch (counter) {
+						case PC:
+							pc++;
+							break;
+						case SP:
+							sp++;
+							break;
+						case A0:
+							a0++;
+							break;
+						case A1:
+							a1++;
+							break;
+					}
 				}
 				r[regnum1] = var;
-				zflag = (var==0);
-				cflag = (0==1);
-				nflag = (0==1);
 				manage_flags=false;
 				break;
 			}
@@ -182,7 +193,21 @@ void Processor::von_Neuman_step(bool debug) {
 				int i;
 				for (i=0; i<size; i++)
 				{
-					read_bit_from_pc(var);
+					var = (var << 1) + m->read_bit(counter);
+					switch (counter) {
+						case PC:
+							pc++;
+							break;
+						case SP:
+							sp++;
+							break;
+						case A0:
+							a0++;
+							break;
+						case A1:
+							a1++;
+							break;
+					}
 				}
 				// sign extension
 				int sign=(var >> (size-1)) & 1;
@@ -190,9 +215,6 @@ void Processor::von_Neuman_step(bool debug) {
 					var += sign << i;
 
 				r[regnum1] = var;
-				zflag = (var==0);
-				cflag = (0==1);
-				nflag = (0==1);
 				manage_flags=false;
 				break;
 			}
@@ -268,19 +290,59 @@ void Processor::von_Neuman_step(bool debug) {
 				break;
 
 			case 0b110100: // write
-				// TODO
+			  {
+				read_counter_from_pc(counter);
+				read_size_from_pc(size);
+				read_reg_from_pc(regnum1);
+				int var = r[regnum1]; //l'entier dont on doit ecrire les size derniers bits dans la memoire a ctr
+				int bit;
+				for (int i = (size-1); i>=0; i--) {
+					bit = (var >> i) & 1;
+					m->write_bit(counter,bit);
+					switch (counter) {
+						case PC:
+							pc++;
+							break;
+						case SP:
+							sp++;
+							break;
+						case A0:
+							a0++;
+							break;
+						case A1:
+							a1++;
+							break;
+					}
+				}
+				manage_flags = false;
 				break;
+			}
 
 			case 0b110101: // call
-				// TODO
+				uword cible;
+				read_addr_from_pc(cible);
+				r[7] = pc;
+				pc = cible;
+				m->set_counter(PC,cible);
 				break;
 
 			case 0b110110: // setctr
-				// TODO
+				read_counter_from_pc(counter);
+				read_reg_from_pc(regnum1);
+				m->set_counter(counter,r[regnum1]);
+				//pas envie de m'embeter avec des cas alors je mets tout a jour (sinon faire des if...else... sur la valeur de counter):
+				pc = m->counter[PC];
+				sp = m->counter[SP];
+				a0 = m->counter[A0];
+				a1 = m->counter[A1];
+				manage_flags = false;
 				break;
 
 			case 0b110111: // getctr
-				// TODO
+				read_counter_from_pc(counter);
+				read_reg_from_pc(regnum1);
+				r[regnum1] = m->counter[counter];
+				manage_flags = false;
 				break;
 			}
 			break; // Do not forget this break!
@@ -294,11 +356,23 @@ void Processor::von_Neuman_step(bool debug) {
 			switch(opcode) {
 
 			case 0b1110000: // push
-				// TODO
+				{
+				read_reg_from_pc(regnum1);
+				sp -= WORDSIZE;
+				m->set_counter(SP,sp);
+				int var = r[regnum1];
+				int bit;
+				for (int i = WORDSIZE-1; i>=0; i--) {
+					bit = (var >> i) & 1;
+					m->write_bit(SP,bit);
+				}
+				m->set_counter(SP,sp);
 				break;
+			  }
 
 			case 0b1110001: // return
-				// TODO
+				pc = r[7];
+				m->set_counter(PC,r[7]);
 				break;
 
 			case 0b1110010: // add3

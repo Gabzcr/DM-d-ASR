@@ -1,6 +1,8 @@
 #include "memory.h"
 
-Memory::Memory(){}
+Memory::Memory(){
+	counter[SP] = MEMSIZE - 1;
+}
 Memory::~Memory(){}
 
 
