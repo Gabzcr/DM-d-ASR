@@ -31,4 +31,5 @@ class Processor {
 	bool zflag;
 	bool cflag;
 	bool nflag;
+  bool vflag;
 };

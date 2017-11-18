@@ -52,7 +52,9 @@ void Processor::von_Neuman_step(bool debug) {
 			fullr = ((doubleword) uop1) + ((doubleword) uop2); // for flags
 			ur = uop1 + uop2;
 			r[regnum1] = ur;
-			manage_flags=true;
+			manage_flags = true;
+			vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 < 0) || (uop1 > 0 && uop2 > 0)));
+			//Pour l'addition, il y a overflow seulement si les deux termes sont de même signe (et carry)
 			break;
 
 		case 0x1: // add2i
@@ -64,6 +66,7 @@ void Processor::von_Neuman_step(bool debug) {
 			ur = uop1 + uop2;
 			r[regnum1] = ur;
 			manage_flags=true;
+			vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 < 0) || (uop1 > 0 && uop2 > 0)));
 			break;
 
 		case 0x2: // sub2
@@ -75,6 +78,8 @@ void Processor::von_Neuman_step(bool debug) {
 			ur = uop1 - uop2;
 			r[regnum1] = ur;
 			manage_flags=true;
+			vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 > 0) || (uop1 > 0 && uop2 < 0)));
+			// Pour la soustraction, il y a overflow seulement si les deux termes sont de signes opposés (et carry)
 			break;
 
 		case 0x3: // sub2i
@@ -86,6 +91,7 @@ void Processor::von_Neuman_step(bool debug) {
 			ur = uop1 - uop2;
 			r[regnum1] = ur;
 			manage_flags=true;
+			vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 > 0) || (uop1 > 0 && uop2 < 0)));
 			break;
 
 		case 0x4: // cmp
@@ -96,6 +102,8 @@ void Processor::von_Neuman_step(bool debug) {
 			fullr = ((doubleword) uop1) - ((doubleword) uop2); // for flags
 			ur = uop1 - uop2;
 			manage_flags=true;
+			vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 > 0) || (uop1 > 0 && uop2 < 0)));
+			// c'est une soustraction...
 			break;
 
 		case 0x5: // cmpi
@@ -106,6 +114,7 @@ void Processor::von_Neuman_step(bool debug) {
 			fullr = ((doubleword) uop1) - ((doubleword) uop2); // for flags
 			ur = uop1 - uop2;
 			manage_flags=true;
+			vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 > 0) || (uop1 > 0 && uop2 < 0)));
 			break;
 
 		case 0x6: // let
@@ -330,11 +339,20 @@ void Processor::von_Neuman_step(bool debug) {
 				read_counter_from_pc(counter);
 				read_reg_from_pc(regnum1);
 				m->set_counter(counter,r[regnum1]);
-				//pas envie de m'embeter avec des cas alors je mets tout a jour (sinon faire des if...else... sur la valeur de counter):
-				pc = m->counter[PC];
-				sp = m->counter[SP];
-				a0 = m->counter[A0];
-				a1 = m->counter[A1];
+				// mise a jour du compteur correspondant du processeur:
+				switch (counter) {
+					case 0b00:
+						pc = m->counter[PC];
+						break;
+					case 0b01:
+						sp = m->counter[SP];
+						break;
+					case 0b10:
+						a0 = m->counter[A0];
+						break;
+					case 0b11:
+						a1 = m->counter[A1];
+					}
 				manage_flags = false;
 				break;
 
@@ -355,14 +373,15 @@ void Processor::von_Neuman_step(bool debug) {
 			read_bit_from_pc(opcode);
 			switch(opcode) {
 
-			case 0b1110000: // push
+			case 0b1110000: // push ATTENTION: on a push size reg et non juste push reg!!!
 				{
+				read_size_from_pc(size);
 				read_reg_from_pc(regnum1);
-				sp -= WORDSIZE;
+				sp -= size;
 				m->set_counter(SP,sp);
 				int var = r[regnum1];
 				int bit;
-				for (int i = WORDSIZE-1; i>=0; i--) {
+				for (int i = size-1; i>=0; i--) {
 					bit = (var >> i) & 1;
 					m->write_bit(SP,bit);
 				}
@@ -385,6 +404,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 + uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 < 0) || (uop1 > 0 && uop2 > 0)));
 				break;
 
 			case 0b1110011: // add3i
@@ -397,6 +417,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 + uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 < 0) || (uop1 > 0 && uop2 > 0)));
 				break;
 
 			case 0b1110100: // sub3
@@ -409,6 +430,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 - uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 > 0) || (uop1 > 0 && uop2 < 0)));
 				break;
 
 			case 0b1110101: // sub3i
@@ -421,6 +443,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 - uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 > 0) || (uop1 > 0 && uop2 < 0)));
 				break;
 
 			case 0b1110110: // and3
@@ -638,10 +661,15 @@ bool Processor::cond_true(int cond) {
 	case 1 :
 		return (! zflag);
 		break;
-					// TODO pour le rendu 2: cas 010 et 011 (comparaisons signees avec le flag manquant (overflow?))
-		// begin sabote
+		//begin sabote
+	case 0b010:
+		return ((!zflag) && ((nflag && vflag)||((!nflag) && (!vflag))));
+		break;
+	case 0b011:
+		return ((nflag && (!vflag)) || ((!nflag) && vflag));
+		break;
 	case 0b100:
-		return ((!zflag) && (!nflag));
+		return ((!zflag) && (!cflag));
 		break;
 	case 0b101:
 		return (!cflag);
@@ -650,7 +678,7 @@ bool Processor::cond_true(int cond) {
 		return (cflag);
 		break;
 	case 0b111:
-		return (zflag || nflag);
+		return(vflag);
 		break;
 		// end sabote
 	}

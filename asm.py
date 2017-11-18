@@ -242,8 +242,8 @@ def asm_pass(iteration, s_file):
                 instruction_encoding = "110110 " + asm_counter(tokens[1]) + asm_reg(tokens[2])
             if opcode == "getctr" and token_count==3:
                 instruction_encoding = "110111 " + asm_counter(tokens[1]) + asm_reg(tokens[2])
-            if opcode == "push" and token_count==2:
-                instruction_encoding = "1110000 " + asm_reg(tokens[1])
+            if opcode == "push" and token_count==3: #ATTENTION : on a push size reg et non juste push reg.
+                instruction_encoding = "1110000 " + asm_size(tokens[1]) +  asm_reg(tokens[2])
             if opcode == "return" and token_count==1:
                 instruction_encoding = "1110001 "
             if opcode == "add3" and token_count==4:
