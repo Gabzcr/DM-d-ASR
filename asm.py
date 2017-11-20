@@ -12,12 +12,33 @@ import argparse
 from numpy import binary_repr
 
 line=0 # global variable to make error reporting easier
-current_addr=0 # idem
+current_address=0 # idem
 labels={} # global because shared between the two passes
+jumps = [] #contiendra pour chaque element [label, type du saut (jump, jumpif ou call), adresse_courante de la ligne du saut, taille de la constante addr, inconnus]
+jump_number = 0 #pour savoir ou on en est dans les sauts quand on appelle asm_addr_signed sur un label
+opcode = "" #just to make this global
+iteration = 1 #just to make this global too
 
 def error(e):
     raise BaseException("Error at line " + str(line) + " : " + e)
 
+def taille(val):
+    if val>=-128 and val<= 127:
+        return 9
+    elif val>=-32768 and val<= 32767:
+        return 18
+    elif val>=-(1<<31) and val<= (1<<31)-1:
+        return 35
+    else:
+        return 67
+
+def ajout(saut):
+    if saut[1] == "jump":
+        return 4
+    elif saut[1] == "jumpif":
+        return (4+3)
+    else: #opcode = "call"
+        return 6
 
 
 # All the asm_xxxx functions are helper functions that parse an operand and convert it into its binary encoding.
@@ -28,7 +49,7 @@ def asm_reg(s):
     if s[0]!='r':
         error("invalid register: " + s)
     try:
-        val = int(s[1:]) # this removes the "r". TODO catch exception here // DONE
+        val = int(s[1:]) # this removes the "r".
     except Exception:
 	    raise error("invalid address for a register: " + s[1:])
     if val<0 or val>7:
@@ -39,9 +60,10 @@ def asm_reg(s):
 
 
 def asm_addr_signed(s):
+    global jump_number
     "converts the string s into its encoding"
     # Is it a label or a constant?
-    if (s[0]>='0' and s[0]<='9') or s[0]=='-' or s[0]=='+': # TODO what it takes to catch hexa here //Done
+    if (s[0]>='0' and s[0]<='9') or s[0]=='-' or s[0]=='+':
         try:
             if (s[0]>='0' and s[0]<='9'):
                 val=int(s,0) #specifying the second argument catches hexa
@@ -61,15 +83,31 @@ def asm_addr_signed(s):
         else:
             return '111 ' +  binary_repr(val, 64)
     else:
-        error("Fixme! labels currently unsupported") #TODO dans le deuxieme rendu
-
-
+        if iteration == 1:
+            jumps.append([s, opcode, current_address, None]) #None is for addr_size that is currently unknown
+            return ""
+        else: #iteration = 2
+            #TODO for debug:
+            #print("adresse de la ligne du jump: ", jumps[jump_number][2], "\nadresse de la ligne du label", labels[jumps[jump_number][0]])
+            jump_size = abs(jumps[jump_number][2] - labels[jumps[jump_number][0]])
+            saut_apres = (jumps[jump_number][2] > labels[jumps[jump_number][0]])
+            if saut_apres: #le jump est apres le label, il faut donc sauter aussi l'instruction jump elle-meme!
+                jump_size += ajout(jumps[jump_number])
+            label_croises = jumps[jump_number][4]
+            for jmp in label_croises:
+                jump_size += jumps[jmp][3]
+            jump_number += 1
+            #print(jump_size)
+            if saut_apres:
+                return asm_addr_signed(str(-(jump_size + 1))) #+1 car le pc est incremente
+            else:
+                return asm_addr_signed(str(jump_size + 1))
 
 def asm_const_unsigned(s):
     "converts the string s into its encoding"
     if (s[0]>='0' and s[0]<='9'): #la condition s[0:2] == '0x' etait inutile, dans ce cas s[0] = 0
         try:
-            val = int(s,0) # TODO  catch exception here // Done
+            val = int(s,0)
         except Exception:
 	        raise error("invalid unsigned const: " + s)
         # The following is not very elegant but easy to trust
@@ -162,7 +200,7 @@ def asm_size(s):
         error("Invalid size: " + s) #ici c'etait ecrit size au lieu de s?
 
 
-def asm_pass(iteration, s_file):
+def asm_pass(s_file):
     global line
     global labels
     global current_address
@@ -303,9 +341,43 @@ if __name__ == '__main__':
     filename = options.filename
     basefilename, extension = os.path.splitext(filename)
     obj_file = basefilename+".obj"
-    code = asm_pass(1, filename) # first pass essentially builds the labels
+    code = asm_pass(filename) # first pass essentially builds the labels
 
-     # code = asm_pass(2, filename) # second pass is for good, but is disabled now
+    #jumps = [[label, opcode, adresse de la ligne du saut, addr_size]], ou addr_size est a determiner pour chaque saut
+    for i in range(len(jumps)): #on determine les sauts (de taille inconnue) entre chaque saut et son label
+        saut = jumps[i]
+        inf = min(saut[2], labels[saut[0]])
+        sup = max(saut[2], labels[saut[0]])
+        inconnus = []
+        for j in range(len(jumps)):
+            saut2 = jumps[j]
+            if saut2 != saut and sup <= saut2[2] and saut2[2] <= inf:
+                inconnus.append(j)
+            elif saut2 == saut and saut[2] > labels[saut[0]]:
+                inconnus.append(j)
+        jumps[i].append(inconnus)
+
+    #initialisation des addr_size des jumps avec les meilleurs cas (on les elargira ensuite):
+    for i in range(len(jumps)):
+        saut = jumps[i]
+        jump_size = abs(saut[2] - labels[saut[0]])
+        saut[3] = taille(jump_size)
+    ok = False
+    while not(ok): #on elargit les tailles des constantes sur lesquelles on a un conflit
+        ok = True
+        for i in range(len(jumps)):
+            jump_size = abs(jumps[i][2] - labels[jumps[i][0]])
+            if jumps[i][2] > labels[jumps[i][0]]: #le jump est apres le label, il faut donc sauter aussi l'instruction jump elle-meme!
+                jump_size += ajout(jumps[i])
+            label_croises = jumps[i][4]
+            for jmp in label_croises:
+                jump_size += jumps[jmp][3]
+            if taille(jump_size) > jumps[i][3]:
+                jumps[i][3] = taille(jump_size)
+                ok = False
+
+    iteration = 2
+    code = asm_pass(filename) # second pass is for good
 
     # statistics
     print "Average instruction size is " + str(1.0*current_address/len(code))
