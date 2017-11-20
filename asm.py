@@ -59,7 +59,7 @@ def asm_reg(s):
 
 
 
-def asm_addr_signed(s):
+def asm_addr_signed(s,opcode):
     global jump_number
     "converts the string s into its encoding"
     # Is it a label or a constant?
@@ -87,21 +87,20 @@ def asm_addr_signed(s):
             jumps.append([s, opcode, current_address, None]) #None is for addr_size that is currently unknown
             return ""
         else: #iteration = 2
-            #TODO for debug:
-            #print("adresse de la ligne du jump: ", jumps[jump_number][2], "\nadresse de la ligne du label", labels[jumps[jump_number][0]])
             jump_size = abs(jumps[jump_number][2] - labels[jumps[jump_number][0]])
             saut_apres = (jumps[jump_number][2] > labels[jumps[jump_number][0]])
             if saut_apres: #le jump est apres le label, il faut donc sauter aussi l'instruction jump elle-meme!
                 jump_size += ajout(jumps[jump_number])
+            else:
+                jump_size -= ajout(jumps[jump_number])
             label_croises = jumps[jump_number][4]
             for jmp in label_croises:
                 jump_size += jumps[jmp][3]
             jump_number += 1
-            #print(jump_size)
             if saut_apres:
-                return asm_addr_signed(str(-(jump_size + 1))) #+1 car le pc est incremente
+                return asm_addr_signed(str(-(jump_size)),opcode)
             else:
-                return asm_addr_signed(str(jump_size + 1))
+                return asm_addr_signed(str(jump_size),opcode)
 
 def asm_const_unsigned(s):
     "converts the string s into its encoding"
@@ -261,9 +260,9 @@ def asm_pass(s_file):
                 instruction_encoding = "10011 " + asm_counter(tokens[1]) + asm_size(tokens[2]) + asm_reg(tokens[3])
             #Here, a lot of constructive copypaste, for instance
             if opcode == "jump" and token_count==2:
-                instruction_encoding = "1010 " + asm_addr_signed(tokens[1])
+                instruction_encoding = "1010 " + asm_addr_signed(tokens[1],"jump")
             if opcode == "jumpif" and token_count==3:
-                instruction_encoding = "1011 " + asm_condition(tokens[1]) + asm_addr_signed(tokens[2])
+                instruction_encoding = "1011 " + asm_condition(tokens[1]) + asm_addr_signed(tokens[2],"jumpif")
             if opcode == "or2" and token_count==3:
                 instruction_encoding = "110000 " + asm_reg(tokens[1]) + asm_reg(tokens[2])
             if opcode == "or2i" and token_count==3:
@@ -275,7 +274,7 @@ def asm_pass(s_file):
             if opcode == "write" and token_count==4:
                 instruction_encoding = "110100 " + asm_counter(tokens[1]) + asm_size(tokens[2]) + asm_reg(tokens[3])
             if opcode == "call" and token_count==2:
-                instruction_encoding = "110101 " + asm_addr_signed(tokens[1])
+                instruction_encoding = "110101 " + asm_addr_signed(tokens[1],"call")
             if opcode == "setctr" and token_count==3:
                 instruction_encoding = "110110 " + asm_counter(tokens[1]) + asm_reg(tokens[2])
             if opcode == "getctr" and token_count==3:
@@ -351,7 +350,7 @@ if __name__ == '__main__':
         inconnus = []
         for j in range(len(jumps)):
             saut2 = jumps[j]
-            if saut2 != saut and sup <= saut2[2] and saut2[2] <= inf:
+            if saut2 != saut and inf <= saut2[2] and saut2[2] <= sup:
                 inconnus.append(j)
             elif saut2 == saut and saut[2] > labels[saut[0]]:
                 inconnus.append(j)
