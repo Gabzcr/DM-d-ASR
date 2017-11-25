@@ -45,6 +45,7 @@ void Processor::von_Neuman_step(bool debug) {
 	switch(opcode) {
 
 		case 0b0000: // add2 reg reg
+		{
 			read_reg_from_pc(regnum1);
 			read_reg_from_pc(regnum2);
 			uop1 = r[regnum1];
@@ -53,11 +54,16 @@ void Processor::von_Neuman_step(bool debug) {
 			ur = uop1 + uop2;
 			r[regnum1] = ur;
 			manage_flags = true;
-			vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 < 0) || (uop1 > 0 && uop2 > 0)));
-			//Pour l'addition, il y a overflow seulement si les deux termes sont de même signe (et carry)
+			int sign1 = (uop1 >> (WORDSIZE-1)) & 1;
+			int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
+			int signres = (ur >> (WORDSIZE-1)) & 1;
+			vflag = ((sign1 == sign2) and (signres != sign1));
+			//Pour l'addition, il y a overflow seulement si les deux termes sont de même signe et le resultat est de signe oppose
 			break;
+		}
 
 		case 0x1: // add2i
+		{
 			read_reg_from_pc(regnum1);
 			read_const_from_pc(constop);
 			uop1 = r[regnum1];
@@ -66,10 +72,15 @@ void Processor::von_Neuman_step(bool debug) {
 			ur = uop1 + uop2;
 			r[regnum1] = ur;
 			manage_flags=true;
-			vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 < 0) || (uop1 > 0 && uop2 > 0)));
+			int sign1 = (uop1 >> (WORDSIZE-1)) & 1;
+			int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
+			int signres = (ur >> (WORDSIZE-1)) & 1;
+			vflag = ((sign1 == sign2) and (signres != sign1));
 			break;
+		}
 
 		case 0x2: // sub2
+		{
 			read_reg_from_pc(regnum1);
 			read_reg_from_pc(regnum2);
 			uop1 = r[regnum1];
@@ -78,11 +89,16 @@ void Processor::von_Neuman_step(bool debug) {
 			ur = uop1 - uop2;
 			r[regnum1] = ur;
 			manage_flags=true;
-			vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 > 0) || (uop1 > 0 && uop2 < 0)));
-			// Pour la soustraction, il y a overflow seulement si les deux termes sont de signes opposés (et carry)
+			int sign1 = (uop1 >> (WORDSIZE-1)) & 1;
+			int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
+			int signres = (ur >> (WORDSIZE-1)) & 1;
+			vflag = ((sign1 != sign2) and (signres != sign1));
+			// Pour la soustraction, il y a overflow seulement si les deux termes sont de signes opposés et le résultat est du signe du premier terme
 			break;
+		}
 
 		case 0x3: // sub2i
+		{
 			read_reg_from_pc(regnum1);
 			read_const_from_pc(constop);
 			uop1 = r[regnum1];
@@ -91,10 +107,15 @@ void Processor::von_Neuman_step(bool debug) {
 			ur = uop1 - uop2;
 			r[regnum1] = ur;
 			manage_flags=true;
-			vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 > 0) || (uop1 > 0 && uop2 < 0)));
+			int sign1 = (uop1 >> (WORDSIZE-1)) & 1;
+			int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
+			int signres = (ur >> (WORDSIZE-1)) & 1;
+			vflag = ((sign1 != sign2) and (signres != sign1));
 			break;
+		}
 
 		case 0x4: // cmp
+		{
 			read_reg_from_pc(regnum1);
 			read_reg_from_pc(regnum2);
 			uop1 = r[regnum1];
@@ -102,20 +123,29 @@ void Processor::von_Neuman_step(bool debug) {
 			fullr = ((doubleword) uop1) - ((doubleword) uop2); // for flags
 			ur = uop1 - uop2;
 			manage_flags=true;
-			vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 > 0) || (uop1 > 0 && uop2 < 0)));
-			// c'est une soustraction...
+			int sign1 = (uop1 >> (WORDSIZE-1)) & 1;
+			int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
+			int signres = (ur >> (WORDSIZE-1)) & 1;
+			vflag = ((sign1 != sign2) and (signres != sign1));
+			// c'est une soustractioletin...
 			break;
+		}
 
 		case 0x5: // cmpi
+		{
 			read_reg_from_pc(regnum1);
-			read_const_from_pc(constop);
+			read_signed_const_from_pc(constop);
 			uop1 = r[regnum1];
 			uop2 = constop;
 			fullr = ((doubleword) uop1) - ((doubleword) uop2); // for flags
 			ur = uop1 - uop2;
 			manage_flags=true;
-			vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 > 0) || (uop1 > 0 && uop2 < 0)));
+			int sign1 = (uop1 >> (WORDSIZE-1)) & 1;
+			int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
+			int signres = (ur >> (WORDSIZE-1)) & 1;
+			vflag = ((sign1 == sign2) and (signres != sign1));
 			break;
+		}
 
 		case 0x6: // let
 			read_reg_from_pc(regnum1);
@@ -125,18 +155,18 @@ void Processor::von_Neuman_step(bool debug) {
 			fullr = (doubleword) uop2; // for flags
 			ur = uop2; // ?
 			r[regnum1] = uop2;
-			manage_flags=true;
+			manage_flags=false;
 			break;
 
 		case 0x7: // leti
 			read_reg_from_pc(regnum1);
-			read_const_from_pc(constop);
+			read_signed_const_from_pc(constop);
 			uop1 = r[regnum1];
 			uop2 = constop;
 			fullr = (doubleword) uop2; // for flags
 			ur = uop2; // ?
 			r[regnum1] = uop2;
-			manage_flags=true;
+			manage_flags=false;
 			break;
 
 		case 0x8: // shift
@@ -333,6 +363,7 @@ void Processor::von_Neuman_step(bool debug) {
 				r[7] = pc;
 				pc = cible;
 				m->set_counter(PC,cible);
+				manage_flags = false;
 				break;
 
 			case 0b110110: // setctr
@@ -386,15 +417,18 @@ void Processor::von_Neuman_step(bool debug) {
 					m->write_bit(SP,bit);
 				}
 				m->set_counter(SP,sp);
+				manage_flags = false;
 				break;
 			  }
 
 			case 0b1110001: // return
 				pc = r[7];
 				m->set_counter(PC,r[7]);
+				manage_flags = false;
 				break;
 
 			case 0b1110010: // add3
+			{
 				read_reg_from_pc(regnum1);
 				read_reg_from_pc(regnum2);
 				read_reg_from_pc(regnum3);
@@ -404,10 +438,15 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 + uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
-				vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 < 0) || (uop1 > 0 && uop2 > 0)));
+				int sign1 = (uop1 >> (WORDSIZE-1)) & 1;
+				int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
+				int signres = (ur >> (WORDSIZE-1)) & 1;
+				vflag = ((sign1 == sign2) and (signres != sign1));
 				break;
+			}
 
 			case 0b1110011: // add3i
+			{
 				read_reg_from_pc(regnum1);
 				read_reg_from_pc(regnum2);
 				read_const_from_pc(constop);
@@ -417,10 +456,15 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 + uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
-				vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 < 0) || (uop1 > 0 && uop2 > 0)));
+				int sign1 = (uop1 >> (WORDSIZE-1)) & 1;
+				int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
+				int signres = (ur >> (WORDSIZE-1)) & 1;
+				vflag = ((sign1 == sign2) and (signres != sign1));
 				break;
+			}
 
 			case 0b1110100: // sub3
+			{
 				read_reg_from_pc(regnum1);
 				read_reg_from_pc(regnum2);
 				read_reg_from_pc(regnum3);
@@ -430,10 +474,15 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 - uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
-				vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 > 0) || (uop1 > 0 && uop2 < 0)));
+				int sign1 = (uop1 >> (WORDSIZE-1)) & 1;
+				int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
+				int signres = (ur >> (WORDSIZE-1)) & 1;
+				vflag = ((sign1 != sign2) and (signres != sign1));
 				break;
+			}
 
 			case 0b1110101: // sub3i
+			{
 				read_reg_from_pc(regnum1);
 				read_reg_from_pc(regnum2);
 				read_const_from_pc(constop);
@@ -443,8 +492,12 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 - uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
-				vflag = ((fullr > ((doubleword) 1)<<WORDSIZE) && ((uop1 < 0 && uop2 > 0) || (uop1 > 0 && uop2 < 0)));
+				int sign1 = (uop1 >> (WORDSIZE-1)) & 1;
+				int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
+				int signres = (ur >> (WORDSIZE-1)) & 1;
+				vflag = ((sign1 == sign2) and (signres != sign1));
 				break;
+			}
 
 			case 0b1110110: // and3
 				read_reg_from_pc(regnum1);
@@ -542,7 +595,7 @@ void Processor::von_Neuman_step(bool debug) {
 				 << " ma0=" << hex << setw(8) << setfill('0') << m->counter[2]
 				 << " ma0=" << hex << setw(8) << setfill('0') << m->counter[3] << ") ";
 			//				 << " newpc=" << hex << setw(9) << setfill('0') << pc;
-		cout << " zcn = " << (zflag?1:0) << (cflag?1:0) << (nflag?1:0);
+		cout << " zcnv = " << (zflag?1:0) << (cflag?1:0) << (nflag?1:0) << (vflag?1:0);
 		for (int i=0; i<8; i++)
 			cout << " r"<< dec << i << "=" << hex << setw(8) << setfill('0') << r[i];
 		cout << endl;
@@ -589,6 +642,39 @@ void Processor::read_const_from_pc(uint64_t& var) {
 	for(int i=0; i<size; i++) {
 		var = (var<<1) + m->read_bit(PC);
 		pc++;
+	}
+}
+
+//signed
+void Processor::read_signed_const_from_pc(uint64_t& var) {
+	var=0;
+	int header=0;
+	int size;
+	read_bit_from_pc(header);
+	if(header==0)
+		size=1;
+	else  {
+		read_bit_from_pc(header);
+		if(header==2)
+			size=8;
+		else {
+			read_bit_from_pc(header);
+			if(header==6)
+				size=32;
+			else
+				size=64;
+		}
+	}
+	// Now we know the size and we can read all the bits of the constant.
+	for(int i=0; i<size; i++) {
+		var = (var<<1) + m->read_bit(PC);
+		pc++;
+	}
+	//sign-extension
+	if (size > 1) {
+		int sign=(var >> (size-1)) & 1;
+		for (int i=size; i<WORDSIZE; i++)
+			var += sign << i;
 	}
 }
 
