@@ -87,19 +87,39 @@ def asm_addr_signed(s,opcode):
             jumps.append([s, opcode, current_address, None]) #None is for addr_size that is currently unknown
             return ""
         else: #iteration = 2
-            jump_size = abs(jumps[jump_number][2] - labels[jumps[jump_number][0]])
-            saut_apres = (jumps[jump_number][2] > labels[jumps[jump_number][0]])
-            if saut_apres: #le jump est apres le label, il faut donc sauter aussi l'instruction jump elle-meme!
-                jump_size += ajout(jumps[jump_number])
-            else:
-                jump_size -= ajout(jumps[jump_number])
-            label_croises = jumps[jump_number][4]
-            for jmp in label_croises:
-                jump_size += jumps[jmp][3]
-            jump_number += 1
-            if saut_apres:
-                return asm_addr_signed(str(-(jump_size)),opcode)
-            else:
+            print(jumps)
+            print labels
+            saut = jumps[jump_number]
+            print 'saut = '
+            print saut
+            if saut[1] == "jump" or saut[1] == "jumpif":
+                jump_size = abs(jumps[jump_number][2] - labels[jumps[jump_number][0]])
+                saut_apres = (jumps[jump_number][2] > labels[jumps[jump_number][0]])
+                if saut_apres: #le jump est apres le label, il faut donc sauter aussi l'instruction jump elle-meme!
+                    jump_size += ajout(jumps[jump_number])
+                else:
+                    jump_size -= ajout(jumps[jump_number])
+                    label_croises = jumps[jump_number][4]
+                for jmp in label_croises:
+                    jump_size += jumps[jmp][3]
+                jump_number += 1
+                if saut_apres:
+                    return asm_addr_signed(str(-(jump_size)),opcode)
+                else:
+                    return asm_addr_signed(str(jump_size),opcode)
+            else: #opcode = "call"
+                jump_size = labels[saut[0]]
+                saut_apres = (saut[2] > labels[saut[0]])
+                label_croises = saut[4]
+                print jump_size
+                if saut[2] > labels[saut[0]]: #le call est avant le label, il faut donc ajouter aussi l'instruction call a l'adresse du nouveau pc
+                    jump_size += ajout(saut)
+                    print("apres_ajout = ",jump_size)
+                for jmp in label_croises:
+                    jump_size += jumps[jmp][3]
+                    print("apres_saut = ", jump_size)
+                print jump_size
+                jump_number += 1
                 return asm_addr_signed(str(jump_size),opcode)
 
 def asm_const_unsigned(s):
@@ -225,7 +245,8 @@ def asm_pass(s_file):
             token=tokens[0]
             if token[-1] == ":": # last character
                 label = token[0: -1] # all the characters except last one
-                labels[label] = current_address
+                if iteration == 1:
+                    labels[label] = current_address
                 tokens = tokens[1:]
 
         # now all that remains should be an instruction... or nothing
@@ -345,38 +366,57 @@ if __name__ == '__main__':
     #jumps = [[label, opcode, adresse de la ligne du saut, addr_size]], ou addr_size est a determiner pour chaque saut
     for i in range(len(jumps)): #on determine les sauts (de taille inconnue) entre chaque saut et son label
         saut = jumps[i]
-        inf = min(saut[2], labels[saut[0]])
-        sup = max(saut[2], labels[saut[0]])
-        inconnus = []
-        for j in range(len(jumps)):
-            saut2 = jumps[j]
-            if saut2 != saut and inf <= saut2[2] and saut2[2] <= sup:
-                inconnus.append(j)
-            elif saut2 == saut and saut[2] > labels[saut[0]]:
-                inconnus.append(j)
+        if saut[1] == "jump" or saut[1] == "jumpif":
+            inf = min(saut[2], labels[saut[0]])
+            sup = max(saut[2], labels[saut[0]])
+            inconnus = []
+            for j in range(len(jumps)):
+                saut2 = jumps[j]
+                if saut2 != saut and inf <= saut2[2] and saut2[2] <= sup:
+                    inconnus.append(j)
+                elif saut2 == saut and saut[2] > labels[saut[0]]:
+                    inconnus.append(j)
+        else: #opcode = "call"
+            inconnus = []
+            for j in range(len(jumps)):
+                saut2 = jumps[j]
+                if saut2[2] <= labels[saut[0]]:
+                    inconnus.append(j)
         jumps[i].append(inconnus)
 
     #initialisation des addr_size des jumps avec les meilleurs cas (on les elargira ensuite):
     for i in range(len(jumps)):
         saut = jumps[i]
-        jump_size = abs(saut[2] - labels[saut[0]])
+        if saut[1] == "jump" or saut[1] == "jumpif":
+            jump_size = abs(saut[2] - labels[saut[0]])
+        else: #opcode = "call"
+            jump_size = labels[saut[0]]
         saut[3] = taille(jump_size)
     ok = False
     while not(ok): #on elargit les tailles des constantes sur lesquelles on a un conflit
         ok = True
         for i in range(len(jumps)):
-            jump_size = abs(jumps[i][2] - labels[jumps[i][0]])
-            if jumps[i][2] > labels[jumps[i][0]]: #le jump est apres le label, il faut donc sauter aussi l'instruction jump elle-meme!
-                jump_size += ajout(jumps[i])
-            label_croises = jumps[i][4]
-            for jmp in label_croises:
-                jump_size += jumps[jmp][3]
+            if saut[1] == "jump" or saut[1] == "jumpif":
+                jump_size = abs(jumps[i][2] - labels[jumps[i][0]])
+                if jumps[i][2] > labels[jumps[i][0]]: #le jump est apres le label, il faut donc sauter aussi l'instruction jump elle-meme!
+                    jump_size += ajout(jumps[i])
+                label_croises = jumps[i][4]
+                for jmp in label_croises:
+                    jump_size += jumps[jmp][3]
+            else: #opcode = "call"
+                jump_size = labels[saut[0]]
+                label_croises = jumps[i][4]
+                if jumps[i][2] > labels[jumps[i][0]]: #le call est avant le label, il faut donc ajouter aussi l'instruction call a l'adresse du nouveau pc
+                    jump_size += ajout(jumps[i])
+                for jmp in label_croises:
+                    jump_size += jumps[jmp][3]
             if taille(jump_size) > jumps[i][3]:
                 jumps[i][3] = taille(jump_size)
                 ok = False
-
+    print(labels)
     iteration = 2
     code = asm_pass(filename) # second pass is for good
+    print(labels)
 
     # statistics
     print "Average instruction size is " + str(1.0*current_address/len(code))
