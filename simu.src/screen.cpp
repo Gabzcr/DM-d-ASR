@@ -36,7 +36,7 @@ void simulate_screen(Memory* m,  bool* refresh) {
 				uint32_t blue = pixel & ((1<<5)-1);
 				uint32_t green = (pixel>>5) & ((1<<5)-1);
 				uint32_t red = (pixel>>10) ;
-				tempscreen[i] = (red << (2+16)) + (green << (3+8)) + (blue << 3);
+				tempscreen[i] = (red << (3+16)) + (green << (3+8)) + (blue << 3);  // error in the original code here : (red << (2+16)) instead of (red << (3+16))
 			}
 			/* update the screen */
 			SDL_UpdateTexture(texture, NULL, tempscreen, WIDTH * sizeof(uint32_t));
