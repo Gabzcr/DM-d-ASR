@@ -324,7 +324,7 @@ def asm_pass(s_file):
                 print tokens
                 print "opcode : " + opcode
                 print "token count : " + str(token_count)
-                error"don't know what to do with: " + source_line
+                error("don't know what to do with: " + source_line)
             else:
                 # get rid of spaces. Thanks Stack Overflow
                 compact_encoding = ''.join(instruction_encoding.split())
