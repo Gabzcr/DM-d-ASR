@@ -87,11 +87,7 @@ def asm_addr_signed(s,opcode):
             jumps.append([s, opcode, current_address, None]) #None is for addr_size that is currently unknown
             return ""
         else: #iteration = 2
-            print(jumps)
-            print (labels)
             saut = jumps[jump_number]
-            print ('saut = ')
-            print (saut)
             if saut[1] == "jump" or saut[1] == "jumpif":
                 jump_size = abs(jumps[jump_number][2] - labels[jumps[jump_number][0]])
                 saut_apres = (jumps[jump_number][2] > labels[jumps[jump_number][0]])
@@ -111,14 +107,10 @@ def asm_addr_signed(s,opcode):
                 jump_size = labels[saut[0]]
                 saut_apres = (saut[2] > labels[saut[0]])
                 label_croises = saut[4]
-                print (jump_size)
                 if saut[2] > labels[saut[0]]: #le call est avant le label, il faut donc ajouter aussi l'instruction call a l'adresse du nouveau pc
                     jump_size += ajout(saut)
-                    print("apres_ajout = ",jump_size)
                 for jmp in label_croises:
                     jump_size += jumps[jmp][3]
-                    print("apres_saut = ", jump_size)
-                print (jump_size)
                 jump_number += 1
                 return asm_addr_signed(str(jump_size),opcode)
 
@@ -224,12 +216,12 @@ def asm_pass(s_file):
     global labels
     global current_address
     code =[] # array of strings, one entry per instruction
-    print ("\n PASS " + str(iteration))
+    print "\n PASS " + str(iteration)
     current_address = 0
     source = open(s_file)
     for source_line in source:
         instruction_encoding=""
-        print ("processing " + source_line[0:-1]) # just to get rid of the final newline
+        print "processing " + source_line[0:-1] # just to get rid of the final newline
 
         # if there is a comment, get rid of it
         index = source_line.find(';') #cette ligne a ete corrigee, str.find(";",source_line) ne marchait pas
@@ -329,17 +321,17 @@ def asm_pass(s_file):
             # If the line wasn't assembled:
             if instruction_encoding=="":
                 # debug stuff
-                print (tokens)
-                print ("opcode : " + opcode)
-                print ("token count : " + str(token_count))
-                error("don't know what to do with: " + source_line)
+                print tokens
+                print "opcode : " + opcode
+                print "token count : " + str(token_count)
+                error"don't know what to do with: " + source_line
             else:
                 # get rid of spaces. Thanks Stack Overflow
                 compact_encoding = ''.join(instruction_encoding.split())
                 instr_size = len(compact_encoding)
                 # Debug output
-                print ("... @" + str(current_address) + " " + binary_repr(current_address,16) + "  :  " + compact_encoding)
-                print  ("                          "+  instruction_encoding+ "   size=" + str(instr_size))
+                print "... @" + str(current_address) + " " + binary_repr(current_address,16) + "  :  " + compact_encoding
+                print  "                          "+  instruction_encoding+ "   size=" + str(instr_size)
                 current_address += instr_size
 
 
@@ -413,13 +405,11 @@ if __name__ == '__main__':
             if taille(jump_size) > jumps[i][3]:
                 jumps[i][3] = taille(jump_size)
                 ok = False
-    print(labels)
     iteration = 2
     code = asm_pass(filename) # second pass is for good
-    print(labels)
 
     # statistics
-    print ("Average instruction size is " + str(1.0*current_address/len(code)))
+    print "Average instruction size is " + str(1.0*current_address/len(code))
 
     outfile = open(obj_file, "w")
     for instr in code:
