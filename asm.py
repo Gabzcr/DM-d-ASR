@@ -95,7 +95,7 @@ def asm_addr_signed(s,opcode):
                     jump_size += ajout(jumps[jump_number])
                 else:
                     jump_size -= ajout(jumps[jump_number])
-                    label_croises = jumps[jump_number][4]
+                label_croises = jumps[jump_number][4]
                 for jmp in label_croises:
                     jump_size += jumps[jmp][3]
                 jump_number += 1
