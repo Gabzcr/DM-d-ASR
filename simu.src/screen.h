@@ -15,5 +15,5 @@ const int MEM_SCREEN_BEGIN = 0x10000;
  * refresh -> shared variable that instructs the thread to refresh the screen
  */
 void simulate_screen(Memory* m, bool *refresh);
-
+int renverserPixels(int pixel);
 #endif

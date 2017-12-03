@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
 	p = new Processor(m);
 
 	m->fill_with_obj_file(filename,0);
-  m->fill_with_obj_file(ascii_bin,0);
+  // m->fill_with_obj_file("ascii_bin",0);
 
 	// create the screen
 	if(graphical_output)

@@ -107,8 +107,8 @@ def asm_addr_signed(s,opcode):
                 jump_size = labels[saut[0]]
                 saut_apres = (saut[2] > labels[saut[0]])
                 label_croises = saut[4]
-                if saut[2] > labels[saut[0]]: #le call est avant le label, il faut donc ajouter aussi l'instruction call a l'adresse du nouveau pc
-                    jump_size += ajout(saut)
+#                if saut[2] < labels[saut[0]]: #le call est avant le label, il faut donc ajouter aussi l'instruction call a l'adresse du nouveau pc
+#                    jump_size += ajout(saut)
                 for jmp in label_croises:
                     jump_size += jumps[jmp][3]
                 jump_number += 1
@@ -292,8 +292,8 @@ def asm_pass(s_file):
                 instruction_encoding = "110110 " + asm_counter(tokens[1]) + asm_reg(tokens[2])
             if opcode == "getctr" and token_count==3:
                 instruction_encoding = "110111 " + asm_counter(tokens[1]) + asm_reg(tokens[2])
-            if opcode == "push" and token_count==3: #ATTENTION : on a push size reg et non juste push reg.
-                instruction_encoding = "1110000 " + asm_size(tokens[1]) +  asm_reg(tokens[2])
+            if opcode == "push" and token_count==2: #ATTENTION : on a push size reg et non juste push reg.
+                instruction_encoding = "1110000 " + asm_reg(tokens[1])
             if opcode == "return" and token_count==1:
                 instruction_encoding = "1110001 "
             if opcode == "add3" and token_count==4:
@@ -318,6 +318,8 @@ def asm_pass(s_file):
                 instruction_encoding = "1111011 " + asm_reg(tokens[1]) + asm_reg(tokens[2]) + asm_const_unsigned(tokens[3])
             if opcode == "asr3" and token_count==4:
                 instruction_encoding = "1111100 " + asm_reg(tokens[1]) + asm_reg(tokens[2]) + asm_shiftval(tokens[3])
+            if opcode == "pop" and token_count == 2:
+                instruction_encoding = "10010 " + asm_counter("sp") + asm_size("32") + asm_reg(tokens[1])
             # If the line wasn't assembled:
             if instruction_encoding=="":
                 # debug stuff
@@ -364,7 +366,7 @@ if __name__ == '__main__':
             inconnus = []
             for j in range(len(jumps)):
                 saut2 = jumps[j]
-                if saut2 != saut and inf <= saut2[2] and saut2[2] <= sup:
+                if saut2 != saut and inf <= saut2[2] and saut2[2] < sup:
                     inconnus.append(j)
                 elif saut2 == saut and saut[2] > labels[saut[0]]:
                     inconnus.append(j)
@@ -398,7 +400,7 @@ if __name__ == '__main__':
             else: #opcode = "call"
                 jump_size = labels[saut[0]]
                 label_croises = jumps[i][4]
-                if jumps[i][2] > labels[jumps[i][0]]: #le call est avant le label, il faut donc ajouter aussi l'instruction call a l'adresse du nouveau pc
+                if jumps[i][2] < labels[jumps[i][0]]: #le call est avant le label, il faut donc ajouter aussi l'instruction call a l'adresse du nouveau pc
                     jump_size += ajout(jumps[i])
                 for jmp in label_croises:
                     jump_size += jumps[jmp][3]
@@ -407,7 +409,7 @@ if __name__ == '__main__':
                 ok = False
     iteration = 2
     code = asm_pass(filename) # second pass is for good
-
+    print(jumps)
     # statistics
     print "Average instruction size is " + str(1.0*current_address/len(code))
 

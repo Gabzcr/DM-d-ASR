@@ -1,9 +1,26 @@
 ; Base graphical routines
 
+main:
+    leti r0 63
+    leti r1 10
+    leti r2 10
+    leti r3 60
+    leti r4 50
+    call draw
+    jump -13
+
+
+
+
+
+
 ; clear_screen
 ; ------------
 
-push 111 r1 ; to prevent side-effects
+
+
+clear_screen:
+push r1 ; to prevent side-effects
 
 leti r1 0x10000
 setctr a0 r1
@@ -17,64 +34,66 @@ clearSL:
   add2i r1 1
   jump clearSL
 clearEL:
-  pop 111 r3
+  pop r3
   return
 
 ; plot
 ; ----
 
-push 111 r3 ; to prevent side-effects
+plot:
+push r3 ; to prevent side-effects
 
-; 160*x = (x+x<<2)<<5
-  let r3 r1
-  shift 0 r3 2
-  add2 r3 r1
-  shift 0 r3 5
+; 160*y = (y+y<<2)<<5
+  let r3 r2
+  shift left r3 2
+  add2 r3 r2
+  shift left r3 5
+add2 r3 r1
+shift left r3 4 ; don't forget pixels' length
 add2i r3 0x10000
-add2 r3 r2
 setctr a0 r3
 write a0 16 r0
 
-pop 111 r3
+pop r3
 return
 
 ; fill
 ; ----
 
-push 111 r5 ; to prevent side-effects
-push 111 r6 ; to prevent side-effects
-push 111 r7 ; to prevent side-effects
+push r5 ; to prevent side-effects
+push r6 ; to prevent side-effects
+push r7 ; to prevent side-effects
 
 let r5 r1
-shift 0 r5 2
+shift left r5 2
 add2 r5 r1
-shift 0 r5 5
+shift left r5 5
 add2i r5 0x10000
 add2 r5 r2
 setctr a0 r5 ; r5 ~ (r1,r2)
 
 let r6 r3
-shift 0 r6 2
+shift left r6 2
 add2 r6 r3
-shift 0 r6 5
+shift left r6 5
 add2i r6 0x10000
 add2 r6 r4 ; r6 ~ (r3,r4)
 
-fillSL:
-  cmp r5 r6
-  jumpif gt fillEL
-  write a0 16 r0
-  ; (r5 - 0x10000) mod 160
-  ; jumpif chgtLgn
-    add2i r1 1
-  chgtLgn:
-    add2i r1 160-r5+r2-1
-  jump fillSL
-fillEL:
-  pop 111 r7
-  pop 111 r6
-  pop 111 r5
-  return
+;fillSL:
+;  cmp r5 r6
+;  jumpif gt fillEL
+;  write a0 16 r0
+;  ; (r5 - 0x10000) mod 160
+;  ; jumpif chgtLgn
+;    add2i r1 1
+;  chgtLgn:
+;    add2i r1 160-r5+r2-1
+;  jump fillSL
+;fillEL:
+;  pop r7
+;  pop r6
+;  pop r5
+;  return
 
 ; draw
 ; ----
@@ -83,39 +102,74 @@ fillEL:
 ; dx = r5, dy = r6
 ; e = r7
 
-sub3 r5 r3 r1
-jumpif eq else0
-  jumpif lt else1
-    sub3 r6 r4 r2
-    jumpif eq else2
-      jumpif lt else3
 
-      else3
-    else2:
-  else1:
-else0:
 
+
+;procédure tracerSegment(entier x1, entier y1, entier x2, entier y2) est
+;  déclarer entier dx, dy ;
+;  déclarer entier e ; // valeur d’erreur
+;  e  ← x2 - x1 ;        // -e(0,1)
+;  dx ← e × 2 ;          // -e(0,1)
+;  dy ← (y2 - y1) × 2 ;  // e(1,0)
+;  tant que x1 ≤ x2 faire
+;    tracerPixel(x1, y1) ;
+;    x1 ← x1 + 1 ;  // colonne du pixel suivant
+;    si (e ← e - dy) ≤ 0 alors  // erreur pour le pixel suivant de même rangée
+;      y1 ← y1 + 1 ;  // choisir plutôt le pixel suivant dans la rangée supérieure
+;      e ← e + dx ;  // ajuste l’erreur commise dans cette nouvelle rangée
+;    fin si ;
+;  fin faire ;
+;  // Le pixel final (x2, y2) n’est pas tracé.
+;fin procédure ;
+
+
+	
+ draw:
+
+push r7
+sub3 r7 r3 r1
+let r5 r7
+shift left r5 1
+sub3 r6 r4 r2
+shift left r6 1
+Tantque:
+    cmp r1 r3
+    jumpif gt FinTantQue
+    push r7
+    call plot
+    pop r7
+    add2i r1 1
+    sub2 r7 r6
+    jumpif gt FinCondition
+        add2i r2 1
+        add2 r7 r5
+
+    FinCondition:
+    jump Tantque
+FinTantQue:
+pop r7
 return
+
 
 ; putchar
 ; -------
 
 ; putchar r3 de couleur r0 aux coord r1,r2
 
-push 111 r4 ; to prevent side-effects
+push r4 ; to prevent side-effects
 
 ; 160*x = (x+x<<2)<<5
   let r4 r1
-  shift 0 r4 2
+  shift left r4 2
   add2 r4 r1
-  shift 0 r4 5
+  shift left r4 5
 add2i r4 0x10000
 add2 r4 r2
 setctr a0 r4
 
 write a0 16 r0
 
-pop 111 r3
+pop r3
 
 return
 

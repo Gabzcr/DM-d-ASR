@@ -1,6 +1,16 @@
 #include "screen.h"
 
 
+int renverserPixels(int pixel)
+{
+	int rv_px = 0;
+	int i;
+	for (i=0; i < 16; i++)
+		rv_px = (rv_px << 1) + ((pixel >> i)&1);
+	return rv_px;
+}
+
+
 void simulate_screen(Memory* m,  bool* refresh) {
 	/*initialise sdl and create the screen*/
 	SDL_Init(SDL_INIT_VIDEO);
@@ -32,6 +42,7 @@ void simulate_screen(Memory* m,  bool* refresh) {
 			for (unsigned int i=0; i < HEIGHT*WIDTH; i++) {
 				uint64_t mword = m->m[ (MEM_SCREEN_BEGIN >>6) + (i>>2)];
 				uint16_t pixel = (mword >> ((i&3)<<4)) & 0xffff;
+				pixel = renverserPixels(pixel);
 
 				uint32_t blue = pixel & ((1<<5)-1);
 				uint32_t green = (pixel>>5) & ((1<<5)-1);

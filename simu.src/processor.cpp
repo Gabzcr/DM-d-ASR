@@ -404,15 +404,14 @@ void Processor::von_Neuman_step(bool debug) {
 			read_bit_from_pc(opcode);
 			switch(opcode) {
 
-			case 0b1110000: // push ATTENTION: on a push size reg et non juste push reg!!!
+			case 0b1110000: // push ATTENTION: on a pushreg et non push size reg!!!
 				{
-				read_size_from_pc(size);
 				read_reg_from_pc(regnum1);
-				sp -= size;
+				sp -= WORDSIZE;
 				m->set_counter(SP,sp);
 				int var = r[regnum1];
 				int bit;
-				for (int i = size-1; i>=0; i--) {
+				for (int i = WORDSIZE-1; i>=0; i--) {
 					bit = (var >> i) & 1;
 					m->write_bit(SP,bit);
 				}
@@ -790,5 +789,26 @@ void Processor::read_size_from_pc(int& size) {
 	else  {
 		read_bit_from_pc(size);
 		read_bit_from_pc(size);
+	}
+	switch(size)
+	{
+		case 0b00:
+			size = 1;
+			break;
+		case 0b01:
+			size = 4;
+			break;
+		case 0b100:
+			size = 8;
+			break;
+		case 0b101:
+			size = 16;
+			break;
+		case 0b110:
+			size = 32;
+			break;
+		case 0b111:
+			size = 64;
+			break;
 	}
 }
