@@ -3,37 +3,120 @@
 ; clear_screen
 ; ------------
 
-leti r1 0x10000 ; 42
-setctr a0 r1 ; 11
+push 111 r1 ; to prevent side-effects
 
-; 160*128 = 0x5000
+leti r1 0x10000
+setctr a0 r1
 
-cmpi r1 0x15000 ; 42
-jumpif gt 36 ; 16
+; 160*128 = 0x5000 -> dernier pixel à 0x15000
 
-write a0 16 r0 ; 14
-
-add2i r1 1 ; 9
-jump -94 ; 13
-
-jump -13
+clearSL:
+  cmpi r1 0x15000
+  jumpif gt clearEL
+  write a0 16 r0
+  add2i r1 1
+  jump clearSL
+clearEL:
+  pop 111 r3
+  return
 
 ; plot
 ; ----
 
-; 160*x = (x+x<<2)<<5
-; let r2 r1
-; shift r2 2
-; add2 r1 r2
-; shift r1 5
+push 111 r3 ; to prevent side-effects
 
-; jump -13
+; 160*x = (x+x<<2)<<5
+  let r3 r1
+  shift 0 r3 2
+  add2 r3 r1
+  shift 0 r3 5
+add2i r3 0x10000
+add2 r3 r2
+setctr a0 r3
+write a0 16 r0
+
+pop 111 r3
+return
 
 ; fill
 ; ----
 
+push 111 r5 ; to prevent side-effects
+push 111 r6 ; to prevent side-effects
+push 111 r7 ; to prevent side-effects
+
+let r5 r1
+shift 0 r5 2
+add2 r5 r1
+shift 0 r5 5
+add2i r5 0x10000
+add2 r5 r2
+setctr a0 r5 ; r5 ~ (r1,r2)
+
+let r6 r3
+shift 0 r6 2
+add2 r6 r3
+shift 0 r6 5
+add2i r6 0x10000
+add2 r6 r4 ; r6 ~ (r3,r4)
+
+fillSL:
+  cmp r5 r6
+  jumpif gt fillEL
+  write a0 16 r0
+  ; (r5 - 0x10000) mod 160
+  ; jumpif chgtLgn
+    add2i r1 1
+  chgtLgn:
+    add2i r1 160-r5+r2-1
+  jump fillSL
+fillEL:
+  pop 111 r7
+  pop 111 r6
+  pop 111 r5
+  return
+
 ; draw
 ; ----
 
+; x1 = r1, y1 = r2, x2 = r3, y2 = r4
+; dx = r5, dy = r6
+; e = r7
+
+sub3 r5 r3 r1
+jumpif eq else0
+  jumpif lt else1
+    sub3 r6 r4 r2
+    jumpif eq else2
+      jumpif lt else3
+
+      else3
+    else2:
+  else1:
+else0:
+
+return
+
 ; putchar
 ; -------
+
+; putchar r3 de couleur r0 aux coord r1,r2
+
+push 111 r4 ; to prevent side-effects
+
+; 160*x = (x+x<<2)<<5
+  let r4 r1
+  shift 0 r4 2
+  add2 r4 r1
+  shift 0 r4 5
+add2i r4 0x10000
+add2 r4 r2
+setctr a0 r4
+
+write a0 16 r0
+
+pop 111 r3
+
+return
+
+jump -13

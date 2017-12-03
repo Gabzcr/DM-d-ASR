@@ -37,9 +37,9 @@ void Memory::set_counter(int ctr, uword val){
 	counter[ctr]=val;
 }
 
-void Memory::fill_with_obj_file(std::string filename) {
+void Memory::fill_with_obj_file(std::string filename, int start) {
 	std::cerr << "loading... " ;
-  counter[0] = 0; // this is pc
+  counter[0] = start; // this is pc
 	std::fstream fin(filename, std::fstream::in);
 	char c;
   while (fin >> c) {

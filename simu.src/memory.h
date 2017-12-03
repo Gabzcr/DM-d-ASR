@@ -31,13 +31,13 @@ class Memory {
 	void set_counter(int ctr, uword val);
 
 	/** method called to initialize the memory */
-	void fill_with_obj_file(std::string filename);
+	void fill_with_obj_file(std::string filename, int start);
 
 	Memory();
 	~Memory();
-	
+
 	// should be private but I am too lazy
-	int counter[4]; 
+	int counter[4];
 	uint64_t m[MEMSIZE/64];
 
 };
