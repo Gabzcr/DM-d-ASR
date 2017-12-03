@@ -515,7 +515,7 @@ void Processor::von_Neuman_step(bool debug) {
 				read_reg_from_pc(regnum2);
 				read_const_from_pc(constop);
 				uop1 = r[regnum2];
-				uop2 = r[constop];
+				uop2 = constop;
 				fullr = ((doubleword) uop1) & ((doubleword) uop2); // for flags
 				ur = uop1 & uop2;
 				r[regnum1] = ur;

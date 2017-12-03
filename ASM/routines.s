@@ -1,12 +1,21 @@
 ; Base graphical routines
 
 main:
+    ;leti r0 63
+    ;leti r1 10
+    ;leti r2 10
+    ;leti r3 60
+    ;leti r4 50
+    ;call draw
     leti r0 63
-    leti r1 10
-    leti r2 10
-    leti r3 60
-    leti r4 50
-    call draw
+    leti r1 50
+    leti r2 50
+    leti r3 2
+    call 938
+    
+    
+    
+    
     jump -13
 
 
@@ -68,32 +77,42 @@ let r5 r1
 shift left r5 2
 add2 r5 r1
 shift left r5 5
-add2i r5 0x10000
 add2 r5 r2
-setctr a0 r5 ; r5 ~ (r1,r2)
+shift left r5 4
+add2i r5 0x10000 ; r5 ~ (r1,r2)
+setctr a0 r5
 
 let r6 r3
 shift left r6 2
 add2 r6 r3
 shift left r6 5
-add2i r6 0x10000
-add2 r6 r4 ; r6 ~ (r3,r4)
+add2 r6 r4
+shift left r5 4
+add2i r6 0x10000 ; r6 ~ (r3,r4)
 
-;fillSL:
-;  cmp r5 r6
-;  jumpif gt fillEL
-;  write a0 16 r0
-;  ; (r5 - 0x10000) mod 160
-;  ; jumpif chgtLgn
-;    add2i r1 1
-;  chgtLgn:
-;    add2i r1 160-r5+r2-1
-;  jump fillSL
-;fillEL:
-;  pop r7
-;  pop r6
-;  pop r5
-;  return
+fillSL:
+  cmp r5 r6
+  jumpif gt fillEL
+  write a0 16 r0
+  ; (r5>>4 - 0x10000) mod 160
+  cmpi r5 ; fin de ligne?
+  jumpif z chgtLg
+    jump startPut
+  chgtLg:
+    add2i r4 2432
+    setctr a0 r4
+    jump startPut
+
+  ; jumpif chgtLgn
+    add2i r1 1
+  chgtLgn:
+    add2i r1 160-r5+r2-1
+  jump fillSL
+fillEL:
+  pop r7
+  pop r6
+  pop r5
+  return
 
 ; draw
 ; ----
@@ -151,8 +170,7 @@ pop r7
 return
 
 
-; putchar
-; -------
+putchar:
 
 ; putchar r3 de couleur r0 aux coord r1,r2
 
@@ -165,34 +183,41 @@ push r5 ; to prevent side-effects
   shift left r4 2
   add2 r4 r1
   shift left r4 5
-add2i r4 0x10000
-add2 r4 r2 ; r4 ~ (r1,r2)
+add2 r4 r2
+shift left r4 4
+add2i r4 0x10000 ; r4 ~ (r1,r2)
 setctr a0 r4
 
 ; 2^8 * 2^6
 
-shift 0 r3 6
+shift left r3 6
 add2i r3 0x60000
 setctr a1 r3
-leti r5 1
 
-startPut
-  cmp r5 32
+leti r5 0
+startPut:
+  cmpi r5 63
   jumpif gt endPut
-    readze a1 00 r3
+    readze a1 1 r3
     cmpi r3 0
-    jumpif z sndPut
+    jumpif z elsePut
       write a0 16 r0
+      add2i r4 16
+      jump sndPut
+    elsePut:
+       add2i r4 16
+       setctr a0 r4 ; a0 <- a0 + 16
     sndPut:
       and3i r3 r5 0b00111
-      addi r5 1
-      cmp r3 0b00111
+      add2i r5 1
+      cmpi r3 0b00111; fin de ligne?
       jumpif z chgtLg
-        add2i r4 16
+        jump startPut
       chgtLg:
         add2i r4 2432
-    jump startPut
-endPut
+        setctr a0 r4
+        jump startPut
+endPut:
 
 pop r5
 pop r4
