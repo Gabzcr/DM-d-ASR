@@ -102,7 +102,9 @@ return
 
 ; putchar r3 de couleur r0 aux coord r1,r2
 
-push 111 r4 ; to prevent side-effects
+push r3 ; to prevent side-effects
+push r4 ; to prevent side-effects
+push r5 ; to prevent side-effects
 
 ; 160*x = (x+x<<2)<<5
   let r4 r1
@@ -110,12 +112,37 @@ push 111 r4 ; to prevent side-effects
   add2 r4 r1
   shift 0 r4 5
 add2i r4 0x10000
-add2 r4 r2
+add2 r4 r2 ; r4 ~ (r1,r2)
 setctr a0 r4
 
-write a0 16 r0
+; 2^8 * 2^6
 
-pop 111 r3
+shift 0 r3 6
+add2i r3 0x60000
+setctr a1 r3
+leti r5 1
+
+startPut
+  cmp r5 32
+  jumpif gt endPut
+    readze a1 00 r3
+    cmpi r3 0
+    jumpif z sndPut
+      write a0 16 r0
+    sndPut:
+      and3i r3 r5 0b00111
+      addi r5 1
+      cmp r3 0b00111
+      jumpif z chgtLg
+        add2i r4 16
+      chgtLg:
+        add2i r4 2432
+    jump startPut
+endPut
+
+pop r5
+pop r4
+pop r3
 
 return
 
