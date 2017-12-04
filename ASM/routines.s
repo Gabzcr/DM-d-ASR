@@ -1,16 +1,99 @@
 ; Base graphical routines
 
 main:
-    leti r0 63
-    leti r1 60
-    leti r2 10
-    leti r3 10
-    leti r4 50
-    call draw
-    leti r0 63
-    leti r1 50
+    ;demo de clear_screen (turquoise)
+    leti r0 0x3fff
+    call clear_screen
+
+    ;demo de fill (bleu nuit)
+    leti r0 0x40d
+    leti r1 10
     leti r2 50
-    leti r3 2
+    leti r3 57
+    leti r4 120
+    call fill
+    ;demo de fill (blanc)
+    leti r0 0x7fff
+    leti r1 58
+    leti r2 50
+    leti r3 103
+    leti r4 120
+    call fill
+    ;demo de fill (rouge coquelicot)
+    leti r0 0x6020
+    leti r1 104
+    leti r2 50
+    leti r3 150
+    leti r4 120
+    call fill
+    
+    ;demo de draw (rouge)
+    leti r0 0x7c00
+    leti r1 15
+    leti r2 10
+    leti r3 57
+    leti r4 44
+    call draw
+    ;demo de draw (rouge)
+    leti r0 0x7c00
+    leti r1 15
+    leti r2 44
+    leti r3 57
+    leti r4 10
+    call draw
+    
+    ;demo de putchar (Gabrielle)
+    leti r0 63
+    leti r1 75
+    leti r2 20
+    leti r3 71
+    call putchar
+    add2i r1 7
+    leti r3 97
+    call putchar
+    add2i r1 7
+    leti r3 98
+    call putchar
+    add2i r1 7
+    leti r3 114
+    call putchar
+    add2i r1 7
+    leti r3 105
+    call putchar
+    add2i r1 7
+    leti r3 101
+    call putchar
+    add2i r1 7
+    leti r3 108
+    call putchar
+    add2i r1 7
+    call putchar
+    add2i r1 7
+    leti r3 101
+    call putchar
+    
+    ;demo de putchar (Quentin)
+    leti r1 75
+    leti r2 30
+    leti r3 81
+    call putchar
+    add2i r1 7
+    leti r3 117
+    call putchar
+    add2i r1 7
+    leti r3 101
+    call putchar
+    add2i r1 7
+    leti r3 110
+    call putchar
+    add2i r1 7
+    leti r3 116
+    call putchar
+    add2i r1 7
+    leti r3 105
+    call putchar
+    add2i r1 7
+    leti r3 110
     call putchar
 
 
@@ -72,20 +155,21 @@ push r5 ; to prevent side-effects
 push r6
 push r7
 
-set r5 r1
-set r6 r2
+let r5 r1
+let r6 r2
 
-let r7 r1
+let r7 r2
 shift left r7 2
-add2 r7 r1
-shift left r7 5
 add2 r7 r2
+shift left r7 5
+add2 r7 r1
 shift left r7 4
 add2i r7 0x10000
 setctr a0 r7 ; a0 ~ (r1,r2)
 
 sub3 r7 r1 r3
 add2i r7 160
+sub2i r7 1
 shift left r7 4 ; r7 = incrément de saut de ligne
 
 forY:
@@ -93,16 +177,17 @@ cmp r6 r4
 jumpif gt endFY
     forX:
     cmp r5 r3
-    jumpif gt endWX
+    jumpif gt endFX
         write a0 16 r0
-        addi r5 1
+        add2i r5 1
+        jump forX
     endFX:
-        getctr a0 r5
-        add2 r5 r7
-        setctr a0 r5
-        set r5 r1
-        add2i r6 1
-        jump forY
+    getctr a0 r5
+    add2 r5 r7
+    setctr a0 r5
+    let r5 r1
+    add2i r6 1
+    jump forY
 endFY:
     pop r7
     pop r6
@@ -193,11 +278,11 @@ push r4 ; to prevent side-effects
 push r5 ; to prevent side-effects
 
 ; 160*x = (x+x<<2)<<5
-  let r4 r1
+  let r4 r2
   shift left r4 2
-  add2 r4 r1
+  add2 r4 r2
   shift left r4 5
-add2 r4 r2
+add2 r4 r1
 shift left r4 4
 add2i r4 0x10000 ; r4 ~ (r1,r2)
 setctr a0 r4
