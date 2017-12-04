@@ -11,11 +11,11 @@ main:
     leti r1 50
     leti r2 50
     leti r3 2
-    call 938
-    
-    
-    
-    
+    call putchar
+
+
+
+
     jump -13
 
 
@@ -69,50 +69,50 @@ return
 ; fill
 ; ----
 
-push r5 ; to prevent side-effects
-push r6 ; to prevent side-effects
-push r7 ; to prevent side-effects
-
-let r5 r1
-shift left r5 2
-add2 r5 r1
-shift left r5 5
-add2 r5 r2
-shift left r5 4
-add2i r5 0x10000 ; r5 ~ (r1,r2)
-setctr a0 r5
-
-let r6 r3
-shift left r6 2
-add2 r6 r3
-shift left r6 5
-add2 r6 r4
-shift left r5 4
-add2i r6 0x10000 ; r6 ~ (r3,r4)
-
-fillSL:
-  cmp r5 r6
-  jumpif gt fillEL
-  write a0 16 r0
-  ; (r5>>4 - 0x10000) mod 160
-  cmpi r5 ; fin de ligne?
-  jumpif z chgtLg
-    jump startPut
-  chgtLg:
-    add2i r4 2432
-    setctr a0 r4
-    jump startPut
-
-  ; jumpif chgtLgn
-    add2i r1 1
-  chgtLgn:
-    add2i r1 160-r5+r2-1
-  jump fillSL
-fillEL:
-  pop r7
-  pop r6
-  pop r5
-  return
+;push r5 ; to prevent side-effects
+;push r6 ; to prevent side-effects
+;push r7 ; to prevent side-effects
+;
+;let r5 r1
+;shift left r5 2
+;add2 r5 r1
+;shift left r5 5
+;add2 r5 r2
+;shift left r5 4
+;add2i r5 0x10000 ; r5 ~ (r1,r2)
+;setctr a0 r5
+;
+;let r6 r3
+;shift left r6 2
+;add2 r6 r3
+;shift left r6 5
+;add2 r6 r4
+;shift left r5 4
+;add2i r6 0x10000 ; r6 ~ (r3,r4)
+;
+;fillSL:
+;  cmp r5 r6
+;  jumpif gt fillEL
+;  write a0 16 r0
+;  ; (r5>>4 - 0x10000) mod 160
+;  cmpi r5 ; fin de ligne?
+;  jumpif z chgtLg
+;    jump startPut
+;  chgtLg:
+;    add2i r4 2432
+;    setctr a0 r4
+;    jump startPut
+;
+;  ; jumpif chgtLgn
+;    add2i r1 1
+;  chgtLgn:
+;    add2i r1 160-r5+r2-1
+;  jump fillSL
+;fillEL:
+;  pop r7
+;  pop r6
+;  pop r5
+;  return
 
 ; draw
 ; ----
