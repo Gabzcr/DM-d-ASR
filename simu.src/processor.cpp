@@ -571,8 +571,21 @@ void Processor::von_Neuman_step(bool debug) {
 				break;
 
 			case 0b1111100: // asr3
-				// TODO
+			{
+				read_reg_from_pc(regnum1);
+				read_reg_from_pc(regnum2);
+				read_shiftval_from_pc(shiftval);
+				uop1 = r[regnum2];
+				int sign=(uop1 >> (WORDSIZE-1)) & 1;
+				ur = uop1 >> shiftval;
+				//sign-extension
+				for (int i=0; i<shiftval; i++)
+					ur += sign << i;
+				r[regnum1] = ur;
+				zflag = (ur == 0);
+				cflag = ( ((uop1 >> (shiftval-1))&1) == 1); //ici que faut-il faire pour le cflag?
 				break;
+			}
 			}
 			break;
 		}

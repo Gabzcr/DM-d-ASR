@@ -390,18 +390,21 @@ if __name__ == '__main__':
     while not(ok): #on elargit les tailles des constantes sur lesquelles on a un conflit
         ok = True
         for i in range(len(jumps)):
+            saut = jumps[i]
             if saut[1] == "jump" or saut[1] == "jumpif":
                 jump_size = abs(jumps[i][2] - labels[jumps[i][0]])
                 if jumps[i][2] > labels[jumps[i][0]]: #le jump est apres le label, il faut donc sauter aussi l'instruction jump elle-meme!
                     jump_size += ajout(jumps[i])
+                else:
+                    jump_size -= ajout(jumps[i]) #je dois retirer ca parce que le jump compte entre lui-meme et le label quand on entre le label dans le dict
                 label_croises = jumps[i][4]
                 for jmp in label_croises:
                     jump_size += jumps[jmp][3]
             else: #opcode = "call"
                 jump_size = labels[saut[0]]
                 label_croises = jumps[i][4]
-                if jumps[i][2] < labels[jumps[i][0]]: #le call est avant le label, il faut donc ajouter aussi l'instruction call a l'adresse du nouveau pc
-                    jump_size += ajout(jumps[i])
+#                if jumps[i][2] < labels[jumps[i][0]]: #le call est avant le label, il faut donc ajouter aussi l'instruction call a l'adresse du nouveau pc
+#                    jump_size += ajout(jumps[i])
                 for jmp in label_croises:
                     jump_size += jumps[jmp][3]
             if taille(jump_size) > jumps[i][3]:
@@ -409,7 +412,6 @@ if __name__ == '__main__':
                 ok = False
     iteration = 2
     code = asm_pass(filename) # second pass is for good
-    print(jumps)
     # statistics
     print "Average instruction size is " + str(1.0*current_address/len(code))
 

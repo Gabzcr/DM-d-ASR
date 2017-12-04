@@ -11,7 +11,7 @@ main:
     leti r1 50
     leti r2 50
     leti r3 2
-    call 938
+    call putchar
 
 
 
