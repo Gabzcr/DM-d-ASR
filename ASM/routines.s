@@ -12,10 +12,10 @@ main:
     leti r2 50
     leti r3 2
     call 938
-    
-    
-    
-    
+
+
+
+
     jump -13
 
 
@@ -66,53 +66,48 @@ write a0 16 r0
 pop r3
 return
 
-; fill
-; ----
+fill:
 
 push r5 ; to prevent side-effects
-push r6 ; to prevent side-effects
-push r7 ; to prevent side-effects
+push r6
+push r7
 
-let r5 r1
-shift left r5 2
-add2 r5 r1
-shift left r5 5
-add2 r5 r2
-shift left r5 4
-add2i r5 0x10000 ; r5 ~ (r1,r2)
-setctr a0 r5
+set r5 r1
+set r6 r2
 
-let r6 r3
-shift left r6 2
-add2 r6 r3
-shift left r6 5
-add2 r6 r4
-shift left r5 4
-add2i r6 0x10000 ; r6 ~ (r3,r4)
+let r7 r1
+shift left r7 2
+add2 r7 r1
+shift left r7 5
+add2 r7 r2
+shift left r7 4
+add2i r7 0x10000
+setctr a0 r7 ; a0 ~ (r1,r2)
 
-fillSL:
-  cmp r5 r6
-  jumpif gt fillEL
-  write a0 16 r0
-  ; (r5>>4 - 0x10000) mod 160
-  cmpi r5 ; fin de ligne?
-  jumpif z chgtLg
-    jump startPut
-  chgtLg:
-    add2i r4 2432
-    setctr a0 r4
-    jump startPut
+sub3 r7 r1 r3
+add2i r7 160
+shift left r7 4 ; r7 = incrément de saut de ligne
 
-  ; jumpif chgtLgn
-    add2i r1 1
-  chgtLgn:
-    add2i r1 160-r5+r2-1
-  jump fillSL
-fillEL:
-  pop r7
-  pop r6
-  pop r5
-  return
+forY:
+cmp r6 r4
+jumpif gt endFY
+    forX:
+    cmp r5 r3
+    jumpif gt endWX
+        write a0 16 r0
+        addi r5 1
+    endFX:
+        getctr a0 r5
+        add2 r5 r7
+        setctr a0 r5
+        set r5 r1
+        add2i r6 1
+        jump forY
+endFY:
+    pop r7
+    pop r6
+    pop r5
+    return
 
 ; draw
 ; ----
@@ -162,7 +157,6 @@ Tantque:
     jumpif gt FinCondition
         add2i r2 1
         add2 r7 r5
-
     FinCondition:
     jump Tantque
 FinTantQue:
