@@ -11,3 +11,4 @@ Les bits de la mémoire sont écris et lus à l'envers par blocs de 64 bits. Ce 
 
 Le processeur lit les instructions et surtout les constantes bit par bit, ce serait plus performant de lire les données par paquets de bits.
 
+La constante 1 est très utilisée. Nous avons donc décidé que leti rx 1 coderait 1 en non signé sur 1 bit, 0 sur 1 bit et toutes les autres constantes en signé comme l'indique l'isa (notamment -1 est codé sur 8 bits).
