@@ -580,7 +580,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 >> shiftval;
 				//sign-extension
 				for (int i=0; i<shiftval; i++)
-					ur += sign << i;
+					ur += sign << (WORDSIZE - 1 - i);
 				r[regnum1] = ur;
 				zflag = (ur == 0);
 				cflag = ( ((uop1 >> (shiftval-1))&1) == 1); //ici que faut-il faire pour le cflag?
