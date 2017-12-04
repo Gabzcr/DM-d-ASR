@@ -1,0 +1,6 @@
+* Avec l'arrivée des routines graphiques on commence à ressentir violemment les limites de la boîte de registres à 8 entrées... Heureusement on a la pile qui est facile à utiliser pour mettre tous les registres à contribution tout en se prémunissant des effets de bords des routines. Néanmoins on aurait été plus confortables avec 16 registres.
+
+*   getctr a0 r5
+    add2 r5 r7
+    setctr a0 r5
+Je ne sais pas ce que vous en pensez mais je trouve un peu triste de devoir utiliser 3 opérations pour un simple décalage de l'addresse mémoire courante. Est-ce qu'on n'aurait pas pu se débrouiller autrement pour éviter de démultiplier le nombre d'opérations liées à l'accès à la mémoire, dont on a de plus en plus besoin ?
