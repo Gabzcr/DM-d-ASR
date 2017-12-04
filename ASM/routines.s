@@ -96,20 +96,11 @@ main:
     leti r3 110
     call putchar
 
-
-
-
     jump -13
-
-
-
-
 
 
 ; clear_screen
 ; ------------
-
-
 
 clear_screen:
 push r1 ; to prevent side-effects
@@ -128,6 +119,7 @@ clearSL:
 clearEL:
   pop r3
   return
+
 
 ; plot
 ; ----
@@ -148,6 +140,10 @@ write a0 16 r0
 
 pop r3
 return
+
+
+;fill
+;---
 
 fill:
 
@@ -194,6 +190,7 @@ endFY:
     pop r5
     return
 
+
 ; draw
 ; ----
 
@@ -201,29 +198,7 @@ endFY:
 ; dx = r5, dy = r6
 ; e = r7
 
-
-
-
-;procédure tracerSegment(entier x1, entier y1, entier x2, entier y2) est
-;  déclarer entier dx, dy ;
-;  déclarer entier e ; // valeur d’erreur
-;  e  ← x2 - x1 ;        // -e(0,1)
-;  dx ← e × 2 ;          // -e(0,1)
-;  dy ← (y2 - y1) × 2 ;  // e(1,0)
-;  tant que x1 ≤ x2 faire
-;    tracerPixel(x1, y1) ;
-;    x1 ← x1 + 1 ;  // colonne du pixel suivant
-;    si (e ← e - dy) ≤ 0 alors  // erreur pour le pixel suivant de même rangée
-;      y1 ← y1 + 1 ;  // choisir plutôt le pixel suivant dans la rangée supérieure
-;      e ← e + dx ;  // ajuste l’erreur commise dans cette nouvelle rangée
-;    fin si ;
-;  fin faire ;
-;  // Le pixel final (x2, y2) n’est pas tracé.
-;fin procédure ;
-
-
-
- draw:
+draw:
 
 push r7
 cmp r3 r1
