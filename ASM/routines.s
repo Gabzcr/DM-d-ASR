@@ -1,12 +1,12 @@
 ; Base graphical routines
 
 main:
-    ;leti r0 63
-    ;leti r1 10
-    ;leti r2 10
-    ;leti r3 60
-    ;leti r4 50
-    ;call draw
+    leti r0 63
+    leti r1 60
+    leti r2 10
+    leti r3 10
+    leti r4 50
+    call draw
     leti r0 63
     leti r1 50
     leti r2 50
@@ -146,11 +146,31 @@ return
  draw:
 
 push r7
+cmp r3 r1
+jumpif ge draw_not_swap
+    ;swap : on inverse x1 et x2
+    add2 r1 r3
+    sub3 r3 r1 r3
+    sub2 r1 r3
+    ; swap de y1 et y2
+    add2 r2 r4
+    sub3 r4 r2 r4
+    sub2 r2 r4
+draw_not_swap:
 sub3 r7 r3 r1
 let r5 r7
 shift left r5 1
 sub3 r6 r4 r2
+leti r4 1
+
+jumpif sgt draw_ascending
+    leti r4 0
+    sub3 r6 r4 r6; si dy <0 on doit l'inverser
+    leti r4 -1; on enlevera 1 a y1 au lieu de l'ajouter
+draw_ascending:
+
 shift left r6 1
+
 Tantque:
     cmp r1 r3
     jumpif gt FinTantQue
@@ -160,7 +180,7 @@ Tantque:
     add2i r1 1
     sub2 r7 r6
     jumpif gt FinCondition
-        add2i r2 1
+        add2 r2 r4
         add2 r7 r5
 
     FinCondition:
