@@ -11,21 +11,15 @@
 
 
 main:
-    leti r0 0x7c00 ; r0 = couleur
     ;coordonnées initiales du sprite: (r1,r2) =
-    leti r1 75
-    leti r2 50
+    leti r0 -1
     leti r3 3
-    leti r6 3 ; nombre d'ennemis à créer. AJUSTER LE NOMBRE D'ENNEMIS ICI!!! (pour l'instant : un ennemi)
+    leti r6 3 ; nombre d'ennemis à créer. AJUSTER LE NOMBRE D'ENNEMIS ICI!!!
     
     ; création des ennemis
-    push r1
-    push r2
-    
     leti r5 409604
     setctr a1 r5
     leti r2 0
-    
     creationEnnemis:
     cmpi r6 0
     jumpif z ennemisCrees
@@ -36,10 +30,11 @@ main:
         sub2i r6 1
     jump creationEnnemis
     ennemisCrees:
-    
-    pop r2
-    pop r1
-    
+
+    leti r1 75
+    leti r2 50
+    leti r0 0x7c00
+    call plot
     
     
     
@@ -59,19 +54,31 @@ label2:
     gestionEnnemis:
     cmpi r6 0
     jumpif z ennemisGeres
+        sub2i r6 1
         ; TODO : mettre au point une meilleure trajectoire pour les ennemis
         readze a1 32 r1
         readze a1 32 r2
         leti r0 0
         call plot
-        leti r0 -1
         add2i r2 1
-        call plot
+        cmpi r2 128
+        jumpif neq pasSorti ; dans ce bloc, le point est sorti du cadre, donc on en crée un nouveau
+            random r1 160
+            leti r2 0
+            getctr a1 r0
+            sub2i r0 64
+            setctr a1 r0
+            write a1 32 r1
+            write a1 32 r2
+            add2i r5 64
+            jump gestionEnnemis
+        pasSorti: ; ceci est un else
+        leti r0 -1
+        call plot_avec_game_over
         setctr a1 r5
         write a1 32 r1
         write a1 32 r2
         add2i r5 64
-        sub2i r6 1        
     jump gestionEnnemis
     ennemisGeres:
     
@@ -92,6 +99,7 @@ label2:
        call plot
        leti r0 0x7c00
        sub2i r2 1
+       call plot
        setctr a0 r5 ; a0 avait été incrémenté lors de readze a0 1 r4
        leti r4 0
        write a0 1 r4 ; on réécris 0 en mémoire pour indiquer que l'action a été traitée
@@ -107,6 +115,7 @@ label2:
        call plot
        leti r0 0x7c00
        add2i r2 1
+       call plot
        setctr a0 r5
        leti r4 0
        write a0 1 r4
@@ -122,6 +131,7 @@ label2:
        call plot
        leti r0 0x7c00
        sub2i r1 1
+       call plot
        setctr a0 r5
        leti r4 0
        write a0 1 r4
@@ -137,17 +147,76 @@ label2:
        call plot
        leti r0 0x7c00
        add2i r1 1
+       call plot
        setctr a0 r5
        leti r4 0
        write a0 1 r4
     label5:
     
-    sleep 100
-    call plot
+    sleep 20
     jump label2
 
 
+; plot_avec_game_over
+; ----
 
+plot_avec_game_over:
+push r3 ; to prevent side-effects
+push r4
+
+
+; 160*y = (y+y<<2)<<5
+  let r3 r2
+  shift left r3 2
+  add2 r3 r2
+  shift left r3 5
+add2 r3 r1
+shift left r3 4 ; don't forget pixels' length
+add2i r3 0x10000
+setctr a0 r3
+readze a0 16 r4
+setctr a0 r3
+cmpi r4 0x7c00
+jumpif neq plot_ok
+    ;c'est le game_over!!!
+    leti r0 0
+    call clear_screen
+    leti r0 -1
+    leti r1 45
+    leti r2 60
+    leti r3 71 ;G
+    call putchar
+    add2i r1 7
+    leti r3 65; A
+    call putchar
+    add2i r1 7
+    leti r3 77; M
+    call putchar
+    add2i r1 8
+    leti r3 69; E
+    call putchar
+    add2i r1 14
+    leti r3 79; O
+    call putchar
+    add2i r1 7
+    leti r3 86; V
+    call putchar
+    add2i r1 7
+    leti r3 69; E
+    call putchar
+    add2i r1 7
+    leti r3 82; R
+    call putchar
+    add2i r1 7
+    leti r3 33; !
+    call putchar
+    jump -13
+plot_ok:
+write a0 16 r0
+
+pop r4
+pop r3
+return
 
 
 
