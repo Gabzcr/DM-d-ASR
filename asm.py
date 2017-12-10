@@ -318,8 +318,15 @@ def asm_pass(s_file):
                 instruction_encoding = "1111011 " + asm_reg(tokens[1]) + asm_reg(tokens[2]) + asm_const_unsigned(tokens[3])
             if opcode == "asr3" and token_count==4:
                 instruction_encoding = "1111100 " + asm_reg(tokens[1]) + asm_reg(tokens[2]) + asm_shiftval(tokens[3])
+            if opcode == "random" and token_count==3:
+                instruction_encoding = "1111101 " + asm_reg(tokens[1]) + asm_const_unsigned(tokens[2])
+                # met dans le registre un entier aleatoire compris entre 0 et la constante
+            if opcode == "sleep" and token_count == 2:
+                instruction_encoding = "1111110 " + asm_const_unsigned(tokens[1])
+                # pause le processeur pendant constante ms
             if opcode == "pop" and token_count == 2:
                 instruction_encoding = "10010 " + asm_counter("sp") + asm_size("32") + asm_reg(tokens[1])
+
             # If the line wasn't assembled:
             if instruction_encoding=="":
                 # debug stuff

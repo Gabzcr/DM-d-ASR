@@ -2,18 +2,86 @@
 
 ; r0 : couleur
 ; (r1,r2) : coordonnées du point sur lequel on travaille
-; r3 : valeur du compteur a0 qui regarde dans la mémoire
+; r5 : valeur du compteur a0 qui regarde dans la mémoire
+; r3 : numéro du charactère de la table (coeur) (provisoire)
+; r4 vaut 1 si la touche est enfoncée et 0 sinon
+; r6 : nombre d'ennemis à gérer
+; a0 se balade sur les touches du clavier
+; a1 se balade dans la liste des ennemis
 
 
 main:
     leti r0 0x7c00 ; r0 = couleur
+    ;coordonnées initiales du sprite: (r1,r2) =
     leti r1 75
-    leti r2 50 ; (r1,r2) = coordonnées du pixel à déplacer
+    leti r2 50
     leti r3 3
-    leti r5 409600 ; r5 stocke la valeur du pointeur a0 vers les bits de mémoire qui s'occupent du clavier
+    leti r6 3 ; nombre d'ennemis à créer. AJUSTER LE NOMBRE D'ENNEMIS ICI!!! (pour l'instant : un ennemi)
+    
+    ; création des ennemis
+    push r1
+    push r2
+    
+    leti r5 409604
+    setctr a1 r5
+    leti r2 0
+    
+    creationEnnemis:
+    cmpi r6 0
+    jumpif z ennemisCrees
+        random r1 160
+        call plot
+        write a1 32 r1
+        write a1 32 r2
+        sub2i r6 1
+    jump creationEnnemis
+    ennemisCrees:
+    
+    pop r2
+    pop r1
+    
+    
+    
+    
     
 label2:
-    call putchar
+
+    leti r5 409604
+    
+    ; gestion des ennemis
+    ; on stocke les coordonnées de chaque ennemi après les touches du clavier en mémoire (abscisse + ordonnée = 64 bits pour chaque ennemi)
+    push r1
+    push r2
+    
+    leti r6 3 ; NOMBRE D'ENNEMIS A MODIFIER ICI AUSSI!!!
+    setctr a1 r5
+    
+    gestionEnnemis:
+    cmpi r6 0
+    jumpif z ennemisGeres
+        ; TODO : mettre au point une meilleure trajectoire pour les ennemis
+        readze a1 32 r1
+        readze a1 32 r2
+        leti r0 0
+        call plot
+        leti r0 -1
+        add2i r2 1
+        call plot
+        setctr a1 r5
+        write a1 32 r1
+        write a1 32 r2
+        add2i r5 64
+        sub2i r6 1        
+    jump gestionEnnemis
+    ennemisGeres:
+    
+
+
+
+    pop r2
+    pop r1
+    
+    leti r5 409600
     
     ; touche 'UP'
     setctr a0 r5
@@ -21,7 +89,7 @@ label2:
     cmpi r4 1
     jumpif neq label1 ; cas où r4 = 0 : on ne bouge pas le pixel
        leti r0 0 ; pour effacer l'ancien emplacement du pixel
-       call putchar
+       call plot
        leti r0 0x7c00
        sub2i r2 1
        setctr a0 r5 ; a0 avait été incrémenté lors de readze a0 1 r4
@@ -36,7 +104,7 @@ label2:
     cmpi r4 1
     jumpif neq label3
        leti r0 0
-       call putchar
+       call plot
        leti r0 0x7c00
        add2i r2 1
        setctr a0 r5
@@ -51,7 +119,7 @@ label2:
     cmpi r4 1
     jumpif neq label4
        leti r0 0
-       call putchar
+       call plot
        leti r0 0x7c00
        sub2i r1 1
        setctr a0 r5
@@ -66,7 +134,7 @@ label2:
     cmpi r4 1
     jumpif neq label5
        leti r0 0
-       call putchar
+       call plot
        leti r0 0x7c00
        add2i r1 1
        setctr a0 r5
@@ -74,8 +142,26 @@ label2:
        write a0 1 r4
     label5:
     
-    sub2i r5 3
+    sleep 100
+    call plot
     jump label2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ; clear_screen
@@ -96,22 +182,8 @@ clearSL:
   add2i r1 1
   jump clearSL
 clearEL:
-  pop r3
+  pop r1
   return
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ; plot

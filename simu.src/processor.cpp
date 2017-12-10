@@ -1,4 +1,5 @@
 #include "processor.h"
+#include <ctime>
 using namespace std;
 
 Processor::Processor(Memory* m): m(m) {
@@ -584,8 +585,27 @@ void Processor::von_Neuman_step(bool debug) {
 				r[regnum1] = ur;
 				zflag = (ur == 0);
 				cflag = ( ((uop1 >> (shiftval-1))&1) == 1); //ici que faut-il faire pour le cflag?
+				manage_flags = false;
 				break;
 			}
+
+			case 0b1111101: //random
+				read_reg_from_pc(regnum1);
+				read_const_from_pc(constop);
+				ur = rand()%constop;
+				r[regnum1] = ur;
+				zflag = (ur == 0);
+				manage_flags = false;
+				break;
+
+			case 0b1111110: //sleep
+				read_const_from_pc(constop);
+				struct timespec tim, tim2;
+   				tim.tv_sec = 0;
+   				tim.tv_nsec = 1000000L*constop;
+				nanosleep(&tim,&tim2);
+				break;
+
 			}
 			break;
 		}

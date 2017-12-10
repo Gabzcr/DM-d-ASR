@@ -13,6 +13,7 @@
 #include "memory.h"
 #include "processor.h"
 
+#include <ctime>
 
 bool force_quit = false;
 bool refresh = true;
@@ -40,6 +41,7 @@ void usage() {
 }
 
 int main(int argc, char* argv[]) {
+  srand(time(NULL));
 
 	if(argc==1) {
 		usage();
