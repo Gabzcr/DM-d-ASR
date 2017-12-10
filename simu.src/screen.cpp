@@ -21,6 +21,7 @@ void simulate_screen(Memory* m,  bool* refresh) {
 	Uint32 last_time = SDL_GetTicks();
 	SDL_RenderSetScale(renderer, 2, 2);
 	bool escape = false;
+	bool is_up = false, is_down = false, is_right = false, is_left = false;
 	/*temp buffer*/
 	uint32_t tempscreen[WIDTH * HEIGHT];
 
@@ -30,11 +31,53 @@ void simulate_screen(Memory* m,  bool* refresh) {
 		while (SDL_PollEvent(&e) != 0) {
 			if (e.type == SDL_QUIT) {
 				escape = true;
-			} else if (e.type == SDL_KEYDOWN) {
-				if (e.key.keysym.sym == SDLK_ESCAPE)
-					escape = true;
 			}
+			else if (e.type == SDL_KEYDOWN) {
+				switch (e.key.keysym.sym)
+				{
+					case SDLK_ESCAPE:
+						escape = true;
+						break;
+					case SDLK_UP:
+						is_up = true; /* met à 1 le bit qui repère la touche arrow_up */
+						break;
+					case SDLK_DOWN:
+						is_down = true;
+						break;
+					case SDLK_LEFT:
+						is_left = true;
+						break;
+					case SDLK_RIGHT:
+						is_right = true;
+						break;
+				}
+			}
+			else if (e.type == SDL_KEYUP) {
+				switch (e.key.keysym.sym)
+				{
+					case SDLK_UP:// pour éviter que la commande soit exécutée plusieurs fois.
+						is_up = false;
+						break;
+					case SDLK_DOWN:
+						is_down = false;
+						break;
+					case SDLK_LEFT:
+						is_left = false;
+						break;
+					case SDLK_RIGHT:
+						is_right = false;
+						break;
+				}
+			}
+
 		}
+		m->write_bit_addr(409600,(int) is_up);
+    m->write_bit_addr(409601,(int) is_down);
+    m->write_bit_addr(409602,(int) is_left);
+    m->write_bit_addr(409603,(int) is_right);
+
+
+
 		/* if we need to refresh the screen*/
 		if (true) {
 			/* convert the colors */
