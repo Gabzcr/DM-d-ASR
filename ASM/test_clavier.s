@@ -3,9 +3,7 @@
 ; r0 : couleur
 ; (r1,r2) : coordonnées du point sur lequel on travaille
 ; r5 : valeur du compteur a0 qui regarde dans la mémoire
-; r3 : numéro du charactère de la table (coeur) (provisoire)
-; r4 vaut 1 si la touche est enfoncée et 0 sinon
-; r6 : nombre d'ennemis à gérer
+; r6 : nombre d'ennemis à gérer/ vitesse des ennemis
 ; a0 se balade sur les touches du clavier
 ; a1 se balade dans la liste des ennemis
 
@@ -13,16 +11,16 @@
 main:
     ;coordonnées initiales du sprite: (r1,r2) =
     leti r0 -1
-    leti r6 5 ; nombre d'ennemis à créer. AJUSTER LE NOMBRE D'ENNEMIS ICI!!!
+    leti r6 10 ; nombre d'ennemis à créer. AJUSTER LE NOMBRE D'ENNEMIS ICI!!!
     
     ; création des ennemis
     leti r5 409604
     setctr a1 r5
-    leti r2 0
     creationEnnemis:
     cmpi r6 0
     jumpif z ennemisCrees
         random r1 160
+        random r2 128
         call sprite_ennemis
         write a1 32 r1
         write a1 32 r2
@@ -30,17 +28,78 @@ main:
     jump creationEnnemis
     ennemisCrees:
 
+    push r1
+    push r2
+    push r3
+    push r4
+    leti r1 20
+    leti r2 20
+    leti r3 140
+    leti r4 20
+    call draw
+    leti r1 20
+    leti r2 20
+    leti r3 20
+    leti r4 108
+    call fill
+    leti r1 20
+    leti r2 108
+    leti r3 140
+    leti r4 108
+    call draw
+    leti r1 140
+    leti r2 20
+    leti r3 140
+    leti r4 108
+    call fill
+    pop r4
+    pop r3
+    pop r2
+    pop r1
+    
     leti r1 75
     leti r2 50
     leti r0 0x7c00
     call sprite_coeur
     
-    leti r6 1 ; VITESSE DES ENNEMIS A AJUSTER ICI!!!
-    
+    leti r6 1 ; VITESSE DES ENNEMIS A AJUSTER ICI (nombre de tours d'attente entre chaque déplacement de 1 pixel, i.e leti r6 1 revient à diviser la vitesse des ennemis par 2)!!!
+    sleep 900
     
     
 label2:
-
+    
+    push r1
+    push r2
+    push r3
+    push r4
+    leti r0 -1
+    leti r1 20
+    leti r2 20
+    leti r3 140
+    leti r4 20
+    call draw
+    leti r1 20
+    leti r2 20
+    leti r3 20
+    leti r4 108
+    call fill
+    leti r1 20
+    leti r2 108
+    leti r3 140
+    leti r4 108
+    call draw
+    leti r1 140
+    leti r2 20
+    leti r3 140
+    leti r4 108
+    call fill
+    pop r4
+    pop r3
+    pop r2
+    pop r1
+    
+    
+    
     leti r5 409604
     
     ; gestion des ennemis
@@ -53,7 +112,7 @@ label2:
     cmpi r6 0
     jumpif neq freeze_ennemis ; si r6 !=0, on décrémente juste r6. Sinon, on gère les ennemis et on remet r6 à sa valeur initiale
     
-    leti r6 5 ; NOMBRE D'ENNEMIS A MODIFIER ICI AUSSI!!!
+    leti r6 10 ; NOMBRE D'ENNEMIS A MODIFIER ICI AUSSI!!!
     setctr a1 r5
     
     gestionEnnemis:
@@ -116,6 +175,8 @@ label2:
     readze a0 1 r4
     cmpi r4 1
     jumpif neq label1 ; cas où r4 = 0 : on ne bouge pas le pixel
+    cmpi r2 21
+    jumpif eq label1 ; cas où le coeur est déjà tout en haut
        leti r0 0 ; pour effacer l'ancien emplacement du pixel
        call sprite_coeur
        leti r0 0x7c00
@@ -132,6 +193,8 @@ label2:
     readze a0 1 r4
     cmpi r4 1
     jumpif neq label3
+    cmpi r2 103
+    jumpif eq label3
        leti r0 0
        call sprite_coeur
        leti r0 0x7c00
@@ -148,6 +211,8 @@ label2:
     readze a0 1 r4
     cmpi r4 1
     jumpif neq label4
+    cmpi r1 21
+    jumpif eq label4
        leti r0 0
        call sprite_coeur
        leti r0 0x7c00
@@ -164,6 +229,8 @@ label2:
     readze a0 1 r4
     cmpi r4 1
     jumpif neq label5
+    cmpi r1 135
+    jumpif eq label5
        leti r0 0
        call sprite_coeur
        leti r0 0x7c00
@@ -503,6 +570,8 @@ endFY:
 draw:
 
 push r7
+push r6
+push r5
 cmp r3 r1
 jumpif ge draw_not_swap
     ;swap : on inverse x1 et x2
@@ -542,6 +611,8 @@ Tantque:
     FinCondition:
     jump Tantque
 FinTantQue:
+pop r5
+pop r6
 pop r7
 return
 
