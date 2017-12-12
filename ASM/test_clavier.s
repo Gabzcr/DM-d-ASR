@@ -24,7 +24,7 @@ main:
     cmpi r6 0
     jumpif z ennemisCrees
         random r1 160
-        call plot
+        call sprite_ennemis
         write a1 32 r1
         write a1 32 r2
         sub2i r6 1
@@ -34,7 +34,7 @@ main:
     leti r1 75
     leti r2 50
     leti r0 0x7c00
-    call plot
+    call sprite_coeur
     
     
     
@@ -59,9 +59,9 @@ label2:
         readze a1 32 r1
         readze a1 32 r2
         leti r0 0
-        call plot
+        call sprite_ennemis
         add2i r2 1
-        cmpi r2 128
+        cmpi r2 124
         jumpif neq pasSorti ; dans ce bloc, le point est sorti du cadre, donc on en crée un nouveau
             random r1 160
             leti r2 0
@@ -74,7 +74,7 @@ label2:
             jump gestionEnnemis
         pasSorti: ; ceci est un else
         leti r0 -1
-        call plot_avec_game_over
+        call sprite_ennemis
         setctr a1 r5
         write a1 32 r1
         write a1 32 r2
@@ -96,10 +96,10 @@ label2:
     cmpi r4 1
     jumpif neq label1 ; cas où r4 = 0 : on ne bouge pas le pixel
        leti r0 0 ; pour effacer l'ancien emplacement du pixel
-       call plot
+       call sprite_coeur
        leti r0 0x7c00
        sub2i r2 1
-       call plot
+       call sprite_coeur
        setctr a0 r5 ; a0 avait été incrémenté lors de readze a0 1 r4
        leti r4 0
        write a0 1 r4 ; on réécris 0 en mémoire pour indiquer que l'action a été traitée
@@ -112,10 +112,10 @@ label2:
     cmpi r4 1
     jumpif neq label3
        leti r0 0
-       call plot
+       call sprite_coeur
        leti r0 0x7c00
        add2i r2 1
-       call plot
+       call sprite_coeur
        setctr a0 r5
        leti r4 0
        write a0 1 r4
@@ -128,10 +128,10 @@ label2:
     cmpi r4 1
     jumpif neq label4
        leti r0 0
-       call plot
+       call sprite_coeur
        leti r0 0x7c00
        sub2i r1 1
-       call plot
+       call sprite_coeur
        setctr a0 r5
        leti r4 0
        write a0 1 r4
@@ -144,10 +144,10 @@ label2:
     cmpi r4 1
     jumpif neq label5
        leti r0 0
-       call plot
+       call sprite_coeur
        leti r0 0x7c00
        add2i r1 1
-       call plot
+       call sprite_coeur
        setctr a0 r5
        leti r4 0
        write a0 1 r4
@@ -157,28 +157,32 @@ label2:
     jump label2
 
 
-; plot_avec_game_over
+; plot_with_game_over
 ; ----
 
-plot_avec_game_over:
+plot_with_game_over:
+;les coordonnées du pixel on déjà été calculé et mis dans r4 avant l'appel de cette fonction
 push r3 ; to prevent side-effects
-push r4
 
 
-; 160*y = (y+y<<2)<<5
-  let r3 r2
-  shift left r3 2
-  add2 r3 r2
-  shift left r3 5
-add2 r3 r1
-shift left r3 4 ; don't forget pixels' length
-add2i r3 0x10000
-setctr a0 r3
-readze a0 16 r4
-setctr a0 r3
-cmpi r4 0x7c00
+readze a0 16 r3
+setctr a0 r4
+cmpi r3 0x7c00
 jumpif neq plot_ok
-    ;c'est le game_over!!!
+    call game_over
+plot_ok:
+write a0 16 r0
+add2i r4 16
+setctr a0 r4
+
+
+pop r3
+return
+
+
+
+
+game_over:
     leti r0 0
     call clear_screen
     leti r0 -1
@@ -211,12 +215,155 @@ jumpif neq plot_ok
     leti r3 33; !
     call putchar
     jump -13
-plot_ok:
-write a0 16 r0
+;pas besoin de return ici car on boucle
 
+
+
+
+
+; sprite_coeur
+; ------------
+
+; fait un coeur personnalisé de coin en haut à gauche r1 r2 et de couleur r0
+
+sprite_coeur:
+    push r4 ; to prevent side-effects
+    push r5 ; to prevent side-effects
+
+; 160*x = (x+x<<2)<<5
+    let r4 r2
+    shift left r4 2
+    add2 r4 r2
+    shift left r4 5
+    add2 r4 r1
+    shift left r4 4
+    add2i r4 0x10000 ; r4 ~ (r1,r2)
+    setctr a0 r4
+    
+    leti r5 0;
+    ;1ere ligne
+    write a0 16 r0
+    write a0 16 r0
+    write a0 16 r5
+    write a0 16 r0
+    write a0 16 r0
+    
+    add2i r4 2560 ; changement de ligne
+    setctr a0 r4
+    
+    ;2eme ligne
+    write a0 16 r0
+    write a0 16 r0
+    write a0 16 r0
+    write a0 16 r0
+    write a0 16 r0
+    
+    add2i r4 2560
+    setctr a0 r4
+    
+    ;3eme ligne
+    write a0 16 r0
+    write a0 16 r0
+    write a0 16 r0
+    write a0 16 r0
+    write a0 16 r0
+    
+    add2i r4 2560
+    setctr a0 r4
+    
+    ;4eme ligne
+    write a0 16 r5
+    write a0 16 r0
+    write a0 16 r0
+    write a0 16 r0
+    write a0 16 r5
+    
+    add2i r4 2560
+    setctr a0 r4
+    
+    ;5eme ligne
+    write a0 16 r5
+    write a0 16 r5
+    write a0 16 r0
+    write a0 16 r5
+    write a0 16 r5
+    
+    add2i r4 2560
+    setctr a0 r4
+
+pop r5
 pop r4
-pop r3
 return
+
+
+;sprite_ennemis
+; ------------
+; fait un ennemi personnalisé, gestion du game_over
+
+sprite_ennemis:
+push r4 ; to prevent side-effects
+push r5 ; to prevent side-effects
+push r7
+
+; 160*x = (x+x<<2)<<5
+    let r4 r2
+    shift left r4 2
+    add2 r4 r2
+    shift left r4 5
+    add2 r4 r1
+    shift left r4 4
+    add2i r4 0x10000 ; r4 ~ (r1,r2)
+    setctr a0 r4
+    
+    leti r5 0;
+    ;1ere ligne
+    add2i r4 16
+    setctr a0 r4
+    call plot_with_game_over
+    call plot_with_game_over
+    add2i r4 2512 ; changement de ligne
+    setctr a0 r4
+    
+    ;2eme ligne
+    call plot_with_game_over
+    add2i r4 16
+    setctr a0 r4
+    call plot_with_game_over
+    call plot_with_game_over
+    add2i r4 2496
+    setctr a0 r4
+    
+    ;3eme ligne
+    call plot_with_game_over
+    add2i r4 16
+    setctr a0 r4
+    add2i r4 16
+    setctr a0 r4
+    call plot_with_game_over
+    add2i r4 2496
+    setctr a0 r4
+    
+    ;4eme ligne
+    add2i r4 16
+    setctr a0 r4
+    call plot_with_game_over
+    call plot_with_game_over
+    
+pop r7
+pop r5
+pop r4
+return
+
+
+
+
+
+
+
+
+
+
+
 
 
 
