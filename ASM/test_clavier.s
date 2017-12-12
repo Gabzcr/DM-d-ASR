@@ -13,8 +13,7 @@
 main:
     ;coordonnées initiales du sprite: (r1,r2) =
     leti r0 -1
-    leti r3 3
-    leti r6 3 ; nombre d'ennemis à créer. AJUSTER LE NOMBRE D'ENNEMIS ICI!!!
+    leti r6 5 ; nombre d'ennemis à créer. AJUSTER LE NOMBRE D'ENNEMIS ICI!!!
     
     ; création des ennemis
     leti r5 409604
@@ -36,6 +35,7 @@ main:
     leti r0 0x7c00
     call sprite_coeur
     
+    leti r6 1 ; VITESSE DES ENNEMIS A AJUSTER ICI!!!
     
     
     
@@ -45,10 +45,15 @@ label2:
     
     ; gestion des ennemis
     ; on stocke les coordonnées de chaque ennemi après les touches du clavier en mémoire (abscisse + ordonnée = 64 bits pour chaque ennemi)
-    push r1
-    push r2
     
-    leti r6 3 ; NOMBRE D'ENNEMIS A MODIFIER ICI AUSSI!!!
+    let r3 r1
+    let r4 r2
+    
+    
+    cmpi r6 0
+    jumpif neq freeze_ennemis ; si r6 !=0, on décrémente juste r6. Sinon, on gère les ennemis et on remet r6 à sa valeur initiale
+    
+    leti r6 5 ; NOMBRE D'ENNEMIS A MODIFIER ICI AUSSI!!!
     setctr a1 r5
     
     gestionEnnemis:
@@ -61,6 +66,21 @@ label2:
         leti r0 0
         call sprite_ennemis
         add2i r2 1
+        cmp r2 r4
+        jumpif ge depasse
+            ;ici on n'a pas dépassé l'ordonnée du coeur donc on se dirige horizontalement vers lui
+            cmp r1 r3
+            jumpif ge gauche
+                ;ici r1 < r3 donc on va à droite
+                add2i r1 1
+            gauche:
+            cmp r3 r1
+            jumpif ge centre
+                ;ici r3 < r1 donc on va à gauche
+                sub2i r1 1
+            centre:
+            ;si c'est déjà centré, on ne fait pas de déplacement latéral
+        depasse:
         cmpi r2 124
         jumpif neq pasSorti ; dans ce bloc, le point est sorti du cadre, donc on en crée un nouveau
             random r1 160
@@ -81,13 +101,14 @@ label2:
         add2i r5 64
     jump gestionEnnemis
     ennemisGeres:
+
+    let r2 r4
+    let r1 r3
+    leti r6 2; on met r6 à un de plus car il est décrémenté juste derrière. VITESSE DES ENNEMIS A MODIFIER ICI AUSSI!!!
     
-
-
-
-    pop r2
-    pop r1
     
+    freeze_ennemis:
+    sub2i r6 1
     leti r5 409600
     
     ; touche 'UP'
