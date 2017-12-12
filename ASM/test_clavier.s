@@ -27,35 +27,6 @@ main:
         sub2i r6 1
     jump creationEnnemis
     ennemisCrees:
-
-    push r1
-    push r2
-    push r3
-    push r4
-    leti r1 20
-    leti r2 20
-    leti r3 140
-    leti r4 20
-    call draw
-    leti r1 20
-    leti r2 20
-    leti r3 20
-    leti r4 108
-    call fill
-    leti r1 20
-    leti r2 108
-    leti r3 140
-    leti r4 108
-    call draw
-    leti r1 140
-    leti r2 20
-    leti r3 140
-    leti r4 108
-    call fill
-    pop r4
-    pop r3
-    pop r2
-    pop r1
     
     leti r1 75
     leti r2 50
