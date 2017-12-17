@@ -11,7 +11,7 @@
 main:
     ;coordonnées initiales du sprite: (r1,r2) =
     leti r0 -1
-    leti r6 10 ; nombre d'ennemis à créer. AJUSTER LE NOMBRE D'ENNEMIS ICI!!!
+    leti r6 12 ; nombre d'ennemis à créer. AJUSTER LE NOMBRE D'ENNEMIS ICI!!!
     
     ; création des ennemis
     leti r5 409604
@@ -27,6 +27,27 @@ main:
         sub2i r6 1
     jump creationEnnemis
     ennemisCrees:
+
+    leti r1 20
+    leti r2 20
+    leti r3 140
+    leti r4 20
+    call draw
+    leti r1 20
+    leti r2 20
+    leti r3 20
+    leti r4 108
+    call fill
+    leti r1 20
+    leti r2 108
+    leti r3 140
+    leti r4 108
+    call draw
+    leti r1 140
+    leti r2 20
+    leti r3 140
+    leti r4 108
+    call fill
     
     leti r1 75
     leti r2 50
@@ -83,7 +104,7 @@ label2:
     cmpi r6 0
     jumpif neq freeze_ennemis ; si r6 !=0, on décrémente juste r6. Sinon, on gère les ennemis et on remet r6 à sa valeur initiale
     
-    leti r6 10 ; NOMBRE D'ENNEMIS A MODIFIER ICI AUSSI!!!
+    leti r6 12 ; NOMBRE D'ENNEMIS A MODIFIER ICI AUSSI!!!
     setctr a1 r5
     
     gestionEnnemis:
@@ -212,7 +233,7 @@ label2:
        write a0 1 r4
     label5:
     
-    sleep 20
+    sleep 19
     jump label2
 
 
