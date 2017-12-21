@@ -18,8 +18,10 @@ class Processor {
 
 	void read_cond_from_pc(int& var);
 	bool cond_true(int cond);
+  void affichage();
 
 	Memory *m;
+  int statistiques[128];
 	uword pc;
 	uword sp;
 	uword a0;

@@ -9,11 +9,164 @@ Processor::Processor(Memory* m): m(m) {
 	a1=0;
 	for (int i=0; i<7; i++)
 		r[i]=0;
+	for (int i =0; i<128;i++) statistiques[i] = 0;
 }
 
 Processor::~Processor()
 {}
 
+void Processor::affichage()
+{
+	int nb_total = 0, i;
+	for (i=0; i<128; i++) nb_total += statistiques[i];
+	for (i=0; i<128; i++) {
+		switch(i) {
+				case 0b0000: // add2
+					printf("add2: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0x1: // add2i
+					printf("add2i: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0x2: // sub2
+					printf("sub2: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0x3: // sub2i
+					printf("sub2i: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0x4: // cmp
+					printf("cmp: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0x5: // cmpi
+					printf("cmpi: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0x6: // let
+					printf("let: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0x7: // leti
+					printf("leti: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0x8: // shift
+					printf("shift: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b10010: // readze
+					printf("readze: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b10011: // readse
+					printf("readse: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0xa: // jump
+					printf("jump: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0xb: // jumpif
+					printf("jumpif: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b110000: // or2
+					printf("or2: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b110001: // or2i
+					printf("or2i: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b110010: // and2
+					printf("and2: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b110011: // and2i
+					printf("and2i: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b110100: // write
+					printf("write: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b110101: // call
+					printf("call: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b110110: // setctr
+					printf("setctr: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b110111: // getctr
+					printf("getctr: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1110000: // push
+					printf("push: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1110001: // return
+					printf("return: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1110010: // add3
+					printf("add3: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1110011: // add3i
+					printf("add3i: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1110100: // sub3
+					printf("sub3: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1110101: // sub3i
+					printf("sub3i: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1110110: // and3
+					printf("and3: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1110111: // and3i
+				printf("and3i: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1111000: // or3
+					printf("or3: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1111001: // or3i
+					printf("or3i: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1111010: // xor3
+					printf("xor3: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1111011: // xor3i
+					printf("xor3i: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1111100: // asr3
+					printf("asr3: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1111101: //random
+					printf("random: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+
+				case 0b1111110: //sleep
+					printf("sleep: %f%%\n", (100*(double)statistiques[i]/nb_total));
+					break;
+		}
+	}
+}
 
 void Processor::von_Neuman_step(bool debug) {
 	// numbers read from the binary code
@@ -60,6 +213,7 @@ void Processor::von_Neuman_step(bool debug) {
 			int signres = (ur >> (WORDSIZE-1)) & 1;
 			vflag = ((sign1 == sign2) and (signres != sign1));
 			//Pour l'addition, il y a overflow seulement si les deux termes sont de même signe et le resultat est de signe oppose
+			statistiques[0]++;
 			break;
 		}
 
@@ -77,6 +231,7 @@ void Processor::von_Neuman_step(bool debug) {
 			int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
 			int signres = (ur >> (WORDSIZE-1)) & 1;
 			vflag = ((sign1 == sign2) and (signres != sign1));
+			statistiques[1]++;
 			break;
 		}
 
@@ -95,6 +250,7 @@ void Processor::von_Neuman_step(bool debug) {
 			int signres = (ur >> (WORDSIZE-1)) & 1;
 			vflag = ((sign1 != sign2) and (signres != sign1));
 			// Pour la soustraction, il y a overflow seulement si les deux termes sont de signes opposés et le résultat est du signe du premier terme
+			statistiques[2]++;
 			break;
 		}
 
@@ -112,6 +268,7 @@ void Processor::von_Neuman_step(bool debug) {
 			int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
 			int signres = (ur >> (WORDSIZE-1)) & 1;
 			vflag = ((sign1 != sign2) and (signres != sign1));
+			statistiques[3]++;
 			break;
 		}
 
@@ -128,7 +285,8 @@ void Processor::von_Neuman_step(bool debug) {
 			int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
 			int signres = (ur >> (WORDSIZE-1)) & 1;
 			vflag = ((sign1 != sign2) and (signres != sign1));
-			// c'est une soustractioletin...
+			// c'est une soustraction...
+			statistiques[4]++;
 			break;
 		}
 
@@ -145,6 +303,7 @@ void Processor::von_Neuman_step(bool debug) {
 			int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
 			int signres = (ur >> (WORDSIZE-1)) & 1;
 			vflag = ((sign1 == sign2) and (signres != sign1));
+			statistiques[5]++;
 			break;
 		}
 
@@ -157,6 +316,7 @@ void Processor::von_Neuman_step(bool debug) {
 			ur = uop2; // ?
 			r[regnum1] = uop2;
 			manage_flags=false;
+			statistiques[6]++;
 			break;
 
 		case 0x7: // leti
@@ -168,6 +328,7 @@ void Processor::von_Neuman_step(bool debug) {
 			ur = uop2; // ?
 			r[regnum1] = uop2;
 			manage_flags=false;
+			statistiques[7]++;
 			break;
 
 		case 0x8: // shift
@@ -187,6 +348,7 @@ void Processor::von_Neuman_step(bool debug) {
 			zflag = (ur==0);
 			// no change to nflag
 			manage_flags=false;
+			statistiques[8]++;
 			break;
 
 		case 0x9:
@@ -221,6 +383,7 @@ void Processor::von_Neuman_step(bool debug) {
 				}
 				r[regnum1] = var;
 				manage_flags=false;
+				statistiques[0b10010]++;
 				break;
 			}
 
@@ -256,17 +419,25 @@ void Processor::von_Neuman_step(bool debug) {
 
 				r[regnum1] = var;
 				manage_flags=false;
+				statistiques[0b10011]++;
 				break;
 			}
 			}
 			break;
 
 		case 0xa: // jump
+		{
 			read_addr_from_pc(offset);
+			if (offset == (uword) -13) {
+				affichage();
+				exit(EXIT_SUCCESS);
+			}
 			pc += offset;
 			m -> set_counter(PC, (uword)pc);
 			manage_flags=false;
+			statistiques[0xa]++;
 			break;
+		}
 
 		case 0xb: // jumpif
 			read_cond_from_pc(condcode);
@@ -276,6 +447,7 @@ void Processor::von_Neuman_step(bool debug) {
 				m -> set_counter(PC, (uword)pc);
 			}
 			manage_flags=false;
+			statistiques[0xb]++;
 			break;
 
 		case 0xc:
@@ -294,6 +466,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 | uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				statistiques[0b110000]++;
 				break;
 
 			case 0b110001: // or2i
@@ -305,6 +478,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 | uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				statistiques[0b110001]++;
 				break;
 
 			case 0b110010: // and2
@@ -316,6 +490,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 & uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				statistiques[0b110010]++;
 				break;
 
 			case 0b110011: // and2i
@@ -327,6 +502,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 & uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				statistiques[0b110011]++;
 				break;
 
 			case 0b110100: // write
@@ -355,6 +531,7 @@ void Processor::von_Neuman_step(bool debug) {
 					}
 				}
 				manage_flags = false;
+				statistiques[0b110100]++;
 				break;
 			}
 
@@ -365,6 +542,7 @@ void Processor::von_Neuman_step(bool debug) {
 				pc = cible;
 				m->set_counter(PC,cible);
 				manage_flags = false;
+				statistiques[0b110101]++;
 				break;
 
 			case 0b110110: // setctr
@@ -386,6 +564,7 @@ void Processor::von_Neuman_step(bool debug) {
 						a1 = m->counter[A1];
 					}
 				manage_flags = false;
+				statistiques[0b110110]++;
 				break;
 
 			case 0b110111: // getctr
@@ -393,6 +572,7 @@ void Processor::von_Neuman_step(bool debug) {
 				read_reg_from_pc(regnum1);
 				r[regnum1] = m->counter[counter];
 				manage_flags = false;
+				statistiques[0b110111]++;
 				break;
 			}
 			break; // Do not forget this break!
@@ -405,7 +585,7 @@ void Processor::von_Neuman_step(bool debug) {
 			read_bit_from_pc(opcode);
 			switch(opcode) {
 
-			case 0b1110000: // push ATTENTION: on a pushreg et non push size reg!!!
+			case 0b1110000: // push ATTENTION: on a push reg et non push size reg!!!
 				{
 				read_reg_from_pc(regnum1);
 				sp -= WORDSIZE;
@@ -418,6 +598,7 @@ void Processor::von_Neuman_step(bool debug) {
 				}
 				m->set_counter(SP,sp);
 				manage_flags = false;
+				statistiques[0b1110000]++;
 				break;
 			  }
 
@@ -425,6 +606,7 @@ void Processor::von_Neuman_step(bool debug) {
 				pc = r[7];
 				m->set_counter(PC,r[7]);
 				manage_flags = false;
+				statistiques[0b1110001]++;
 				break;
 
 			case 0b1110010: // add3
@@ -442,6 +624,7 @@ void Processor::von_Neuman_step(bool debug) {
 				int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
 				int signres = (ur >> (WORDSIZE-1)) & 1;
 				vflag = ((sign1 == sign2) and (signres != sign1));
+				statistiques[0b1110010]++;
 				break;
 			}
 
@@ -460,6 +643,7 @@ void Processor::von_Neuman_step(bool debug) {
 				int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
 				int signres = (ur >> (WORDSIZE-1)) & 1;
 				vflag = ((sign1 == sign2) and (signres != sign1));
+				statistiques[0b1110011]++;
 				break;
 			}
 
@@ -478,6 +662,7 @@ void Processor::von_Neuman_step(bool debug) {
 				int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
 				int signres = (ur >> (WORDSIZE-1)) & 1;
 				vflag = ((sign1 != sign2) and (signres != sign1));
+				statistiques[0b1110100]++;
 				break;
 			}
 
@@ -496,6 +681,7 @@ void Processor::von_Neuman_step(bool debug) {
 				int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
 				int signres = (ur >> (WORDSIZE-1)) & 1;
 				vflag = ((sign1 == sign2) and (signres != sign1));
+				statistiques[0b1110101]++;
 				break;
 			}
 
@@ -509,6 +695,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 & uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				statistiques[0b1110110]++;
 				break;
 
 			case 0b1110111: // and3i
@@ -521,6 +708,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 & uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				statistiques[0b1110111]++;
 				break;
 
 			case 0b1111000: // or3
@@ -533,6 +721,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 | uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				statistiques[0b1111000]++;
 				break;
 
 			case 0b1111001: // or3i
@@ -545,6 +734,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 | uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				statistiques[0b1111001]++;
 				break;
 
 			case 0b1111010: // xor3
@@ -557,6 +747,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 ^ uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				statistiques[0b1111010]++;
 				break;
 
 			case 0b1111011: // xor3i
@@ -569,6 +760,7 @@ void Processor::von_Neuman_step(bool debug) {
 				ur = uop1 ^ uop2;
 				r[regnum1] = ur;
 				manage_flags=true;
+				statistiques[0b1111011]++;
 				break;
 
 			case 0b1111100: // asr3
@@ -586,6 +778,7 @@ void Processor::von_Neuman_step(bool debug) {
 				zflag = (ur == 0);
 				cflag = ( ((uop1 >> (shiftval-1))&1) == 1); //ici que faut-il faire pour le cflag?
 				manage_flags = false;
+				statistiques[0b1111100]++;
 				break;
 			}
 
@@ -596,6 +789,7 @@ void Processor::von_Neuman_step(bool debug) {
 				r[regnum1] = ur;
 				zflag = (ur == 0);
 				manage_flags = false;
+				statistiques[0b1111101]++;
 				break;
 
 			case 0b1111110: //sleep
@@ -604,6 +798,7 @@ void Processor::von_Neuman_step(bool debug) {
    				tim.tv_sec = 0;
    				tim.tv_nsec = 1000000L*constop;
 				nanosleep(&tim,&tim2);
+				statistiques[0b1111110]++;
 				break;
 
 			}

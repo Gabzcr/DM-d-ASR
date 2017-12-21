@@ -294,6 +294,7 @@ game_over:
     add2i r1 7
     leti r3 33; !
     call putchar
+    sleep 999
     jump -13
 ;pas besoin de return ici car on boucle
 
