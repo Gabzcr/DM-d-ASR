@@ -27,8 +27,8 @@ GoL:
 ; bud test
 
 leti r0 0x0000 ; black
-call clear_screen
-leti r7 0xffff ; white
+;call clear_screen
+leti r7 -1 ; white
 
 leti r1 0x60004
 setctr a0 r1
@@ -41,6 +41,32 @@ write a0 4 r7 ; 1,2
 leti r1 0x60504
 setctr a0 r1
 write a0 4 r7 ; 2,1
+
+aa:
+    leti r1 0
+    leti r2 0x60000
+    setctr a0 r2 ; table
+    leti r3 0x10000
+    setctr a1 r3 ; screen
+    
+    sleep 999
+
+    ab:
+
+        add2i r1 1
+        cmpi r1 128
+        jumpif gt -16
+            readze a0 4 r5
+            cmpi r5 1
+            jumpif neq ac
+                write a1 16 r7
+                jump ab
+            ac:
+                getctr a0 r2
+                add2i r2 16
+                setctr a0 r2
+                jump ab
+sleep 999
 
 ; ----------------------------------------------------------
                         GameOfLife:
@@ -400,7 +426,7 @@ oddTimeLoop:
         ; donc r = r1 - (r1/10) >> 4
         ; plus rapide à calculer que r1/160 directement
         let r3 r1
-        leti r4 10
+        leti r4 160
     	leti r5 0
         debutBoucle1:
         	cmp r4 r3
@@ -421,8 +447,6 @@ oddTimeLoop:
         	shift right r4 1
         	jump debutBoucle2
         fin:
-            shift right r5 4 ; /16
-            sub3 r3 r1 r5
             ; ---------------------------------
         cmpi r3 0
         jumpif gt oddMiddle
@@ -601,6 +625,8 @@ endOddTimeLoop: ;every cell's neighbours number is up-to-date
     setctr a0 r2 ; table
     leti r3 0x10000
     setctr a1 r3 ; screen
+    
+    sleep 999
 
     oddLifeLoop:
         cmpi r1 127
@@ -976,7 +1002,7 @@ evenTimeLoop:
         evenW:
         ; calcul de r = r1 mod 160
         let r3 r1
-        leti r4 10
+        leti r4 160
     	leti r5 0
         DebutBoucle1:
         	cmp r4 r3
@@ -997,8 +1023,6 @@ evenTimeLoop:
         	shift right r4 1
         	jump DebutBoucle2
         Fin:
-            shift right r5 4 ; /16
-            sub3 r3 r1 r5
             ; ---------------------------------
         cmpi r3 0
         jumpif gt evenMiddle
@@ -1176,6 +1200,8 @@ endEvenTimeLoop:
     setctr a0 r2 ; table
     leti r3 0x10000
     setctr a1 r3 ; screen
+    
+    sleep 999
 
     evenLifeLoop:
         add2i r6 2
@@ -1238,4 +1264,5 @@ clearSL:
 clearEL:
   pop r3
   return
+
 
