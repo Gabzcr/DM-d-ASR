@@ -1,5 +1,3 @@
-; Base graphical routines
-
 ; r0 : couleur
 ; (r1,r2) : coordonnées du point sur lequel on travaille
 ; r5 : valeur du compteur a0 qui regarde dans la mémoire
@@ -434,28 +432,6 @@ pop r7
 pop r5
 pop r4
 return
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

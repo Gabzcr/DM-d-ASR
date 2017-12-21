@@ -168,7 +168,7 @@ void Processor::affichage()
 	}
 }
 
-void Processor::von_Neuman_step(bool debug) {
+void Processor::von_Neuman_step(bool debug, bool stats) {
 	// numbers read from the binary code
 	int opcode=0;
 	int regnum1=0;
@@ -429,7 +429,7 @@ void Processor::von_Neuman_step(bool debug) {
 		{
 			read_addr_from_pc(offset);
 			if (offset == (uword) -13) {
-				affichage();
+				if (stats) affichage();
 				exit(EXIT_SUCCESS);
 			}
 			pc += offset;

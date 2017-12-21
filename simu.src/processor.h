@@ -4,7 +4,7 @@ class Processor {
  public:
 	Processor(Memory* m);
 	~Processor();
-	void von_Neuman_step(bool debug);
+	void von_Neuman_step(bool debug, bool stats);
 
  private:
 	void read_bit_from_pc(int& var);
