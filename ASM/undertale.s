@@ -17,8 +17,19 @@ main:
     creationEnnemis:
     cmpi r6 0
     jumpif z ennemisCrees
-        random r1 160
-        random r2 128
+        generation_aleatoire:
+        random r1 155
+        random r2 123
+        cmpi r1 65
+        jumpif lt creationOK
+        cmpi r1 85
+        jumpif gt creationOK
+        cmpi r2 40
+        jumpif lt creationOK
+        cmpi r2 60
+        jumpif gt creationOK
+            jump generation_aleatoire
+        creationOK:
         call sprite_ennemis
         write a1 32 r1
         write a1 32 r2
