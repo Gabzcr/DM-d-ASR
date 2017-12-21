@@ -126,7 +126,7 @@ oddTimeLoop:
 
                 write a1 4 r3 ; that's the NErn neighbour
 
-                leti r4 r2
+                let r4 r2
                 sub2i r4 4
                 setctr a1 r4 ; moving to the Wrn neighbour
                 readze a1 4 r3
@@ -614,7 +614,7 @@ endOddTimeLoop: ;every cell's neighbours number is up-to-date
                 write a0 4 r5
                 write a1 16 r7
                 add2i r1 1
-                jump oddLifeLoop:
+                jump oddLifeLoop
             odd2neighbours: ; depends on whether the cell was alive
             cmpi r5 2
             jumpif neq oddDead
@@ -628,14 +628,14 @@ endOddTimeLoop: ;every cell's neighbours number is up-to-date
                     write a0 4 r5
                     write a1 16 r7
                     add2i r1 1
-                    jump oddLifeLoop:
+                    jump oddLifeLoop
             oddDead:
                 setctr a0 r4
                 leti r5 0
                 write a0 4 r5
                 write a1 16 r0
                 add2i r1 1
-                jump oddLifeLoop:
+                jump oddLifeLoop
 
 ; ------------------------------------------------------
 ; ------------------------------------------------------
@@ -707,7 +707,7 @@ evenTimeLoop:
 
                 write a1 4 r3 ; that's the NErn neighbour
 
-                leti r4 r2
+                let r4 r2
                 sub2i r4 4
                 setctr a1 r4 ; moving to the Wrn neighbour
                 readze a1 4 r3
@@ -1194,7 +1194,7 @@ endEvenTimeLoop:
                 write a0 4 r5
                 write a1 16 r7
                 add2i r1 1
-                jump evenLifeLoop:
+                jump evenLifeLoop
             even2neighbours: ; depends on whether the cell was alive
             cmpi r5 2
             jumpif neq evenDead
@@ -1208,11 +1208,34 @@ endEvenTimeLoop:
                     write a0 4 r5
                     write a1 16 r7
                     add2i r1 1
-                    jump evenLifeLoop:
+                    jump evenLifeLoop
             evenDead:
                 setctr a0 r4
                 leti r5 0
                 write a0 4 r5
                 write a1 16 r0
                 add2i r1 1
-                jump evenLifeLoop:
+                jump evenLifeLoop
+
+
+; clear_screen
+; ------------
+
+clear_screen:
+push r1 ; to prevent side-effects
+
+leti r1 0x10000
+setctr a0 r1
+
+; 160*128 = 0x5000 -> dernier pixel à 0x15000
+
+clearSL:
+  cmpi r1 0x15000
+  jumpif gt clearEL
+  write a0 16 r0
+  add2i r1 1
+  jump clearSL
+clearEL:
+  pop r3
+  return
+
