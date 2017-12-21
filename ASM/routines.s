@@ -26,7 +26,7 @@ main:
     leti r3 150
     leti r4 120
     call fill
-    
+
     ;demo de draw (rouge)
     leti r0 0x7c00
     leti r1 15
@@ -41,7 +41,7 @@ main:
     leti r3 57
     leti r4 10
     call draw
-    
+
     ;demo de putchar (Gabrielle)
     leti r0 63
     leti r1 75
@@ -71,7 +71,7 @@ main:
     add2i r1 7
     leti r3 101
     call putchar
-    
+
     ;demo de putchar (Quentin)
     leti r1 75
     leti r2 30
