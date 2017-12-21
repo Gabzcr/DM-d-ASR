@@ -27,7 +27,7 @@ push r7
 ; leti r7 0xffff ; white
 
 ; initialisation
-leti r0 0
+leti r4 0
 leti r2 0x60000 ; pixel (0,0) in the even table (aka NW cell)
 leti r3 0x6027B ; pixel (0,159)     //          (aka NE cell)
 leti r4 0x73D7F ; pixel (127,0)     //          (aka SW cell)
@@ -36,8 +36,9 @@ leti r5 0x73FFB ; pixel (127,159)   //          (aka SE cell)
 
 oddTimeLoop:
 
-    setctr a0 r2 ; we're reading in the even table
     leti r1 0 ; cell counter
+    leti r2 0x60000
+    setctr a0 r2 ; we're reading in the even table
 
     oddLoop:
 
@@ -46,456 +47,535 @@ oddTimeLoop:
         cmpi r1 0
         jumpif gt oddN
             setctr a1 r2 ; reading NW's state
-            readze a1 4 r6 ; |
-            cmpi r6 1 ; alive ?
+            readze a1 4 r3 ; |
+            cmpi r3 1 ; alive ?
             jumpif neq endOddLoop ; dead cell => nothing to do
-                leti r0 0x87FF7
-                setctr a1 r0 ; moving to the odd NWrn neighbour
-                write a1 4 r6
+                leti r4 0x87FF7
+                setctr a1 r4 ; moving to the odd NWrn neighbour
+                write a1 4 r3
 
-                leti r0 0x87D7F
-                setctr a1 r0 ; moving to the odd Nrn neighbour
-                write a1 4 r6
+                leti r4 0x87D7F
+                setctr a1 r4 ; moving to the odd Nrn neighbour
+                write a1 4 r3
 
-                write a1 4 r6 ; the NErn neighbour is right after
+                write a1 4 r3 ; the NErn neighbour is right after
 
-                leti r0 0x74004
-                setctr a1 r0 ; moving to the odd Ern neighbour
-                write a1 4 r6
+                leti r4 0x74004
+                setctr a1 r4 ; moving to the odd Ern neighbour
+                write a1 4 r3
 
-                add2i r0 628 ; 157*4 -> +1 line -3 cells
-                setctr a1 r0 ; moving to the odd Wrn neighbour
-                write a1 4 r6
+                add2i r4 628 ; 157*4 -> +1 line -3 cells
+                setctr a1 r4 ; moving to the odd Wrn neighbour
+                write a1 4 r3
 
-                write a1 4 r6 ; that's the odd Srn neighbour
+                write a1 4 r3 ; that's the odd Srn neighbour
 
-                write a1 4 r6 ; that's the odd SErn neighbour
+                write a1 4 r3 ; that's the odd SErn neighbour
 
-                add2i r0 628
-                setctr a1 r0 ; moving to the odd SWrn neighbour
-                write a1 4 r6
+                add2i r4 628
+                setctr a1 r4 ; moving to the odd SWrn neighbour
+                write a1 4 r3
 
-
+; ------------------------------------------------------
                 ; for these cells only the NErn, Ern and SErn cells
                 ; can be modified directly, for the others we will
         oddN:   ; have to consider what has been written before.
         cmpi r1 126
         jumpif gt oddNE
             setctr a1 r2 ; reading the cell's state
-            readze a1 4 r6 ; |
-            cmpi r6 1 ; alive ?
+            readze a1 4 r3 ; |
+            cmpi r3 1 ; alive ?
             jumpif neq endOddLoop ; dead cell => nothing to do
-                let r0 r2
-                add2i r0 0x27D7C
-                setctr a1 r0 ; moving to the odd NWrn neighbour
-                readze a1 4 r6
-                add2i r6 1 ; neighbours number ++
-                setctr a1 r0 ; a1 moved on so what have to make it
-                write a1 4 r6 ; come back before we update
+                let r4 r2
+                add2i r4 0x27D7C
+                setctr a1 r4 ; moving to the odd NWrn neighbour
+                readze a1 4 r3
+                add2i r3 1 ; neighbours number ++
+                setctr a1 r4 ; a1 moved on so what have to make it
+                write a1 4 r3 ; come back before we update
 
-                add2i r0 4
-                readze a1 4 r6 ; that's the Nrn neighbour
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 4
+                readze a1 4 r3 ; that's the Nrn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                write a1 4 r6 ; that's the NErn neighbour
+                write a1 4 r3 ; that's the NErn neighbour
 
-                leti r0 r2
-                sub2i r0 4
-                setctr a1 r0 ; moving to the Wrn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                leti r4 r2
+                sub2i r4 4
+                setctr a1 r4 ; moving to the Wrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 8 ; passing the cell itself
-                setctr a1 r0 ; and now to the Ern neighbour
-                write a1 4 r6
+                add2i r4 8 ; passing the cell itself
+                setctr a1 r4 ; and now to the Ern neighbour
+                write a1 4 r3
 
-                add2i r0 628
-                setctr a1 r0 ; moving to the SWrn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 628
+                setctr a1 r4 ; moving to the SWrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 4
-                readze a1 4 r6 ; that's the Srn neighbour
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 4
+                readze a1 4 r3 ; that's the Srn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                write a1 4 r6 ; that's the SErn neighbour
+                write a1 4 r3 ; that's the SErn neighbour
 
-
+; ------------------------------------------------------
         oddNE: ; the NErn can still be modified directly
         cmpi r1 126
         jumpif gt oddSW
             setctr a1 r2 ; reading the cell's state
-            readze a1 4 r6 ; |
-            cmpi r6 1 ; alive ?
+            readze a1 4 r3 ; |
+            cmpi r3 1 ; alive ?
             jumpif neq endOddLoop ; dead cell => nothing to do
-                leti r0 0x73FF7
-                setctr a1 r0 ; moving to the NWrn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                leti r4 0x73FF7
+                setctr a1 r4 ; moving to the NWrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 4
-                readze a1 4 r6 ; that's the Nrn neighbour (ie SE)
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 4
+                readze a1 4 r3 ; that's the Nrn neighbour (ie SE)
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                leti r0 0x87FF7
-                setctr a1 r0 ; moving to the NErn neighbour (ie SW)
-                write a1 4 r6
+                leti r4 0x87FF7
+                setctr a1 r4 ; moving to the NErn neighbour (ie SW)
+                write a1 4 r3
 
-                leti r0 0x74000
-                setctr a1 r0 ; moving to the Ern neighbour (ie NW)
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                leti r4 0x74000
+                setctr a1 r4 ; moving to the Ern neighbour (ie NW)
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 628
-                setctr a1 r0 ; that's the Wrn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 628
+                setctr a1 r4 ; that's the Wrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 8 ; passing the cell itself
-                setctr a1 r0 ; now we're at the SErn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 8 ; passing the cell itself
+                setctr a1 r4 ; now we're at the SErn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 628
-                readze a1 4 r6 ; that's the SWrn neighbour
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 628
+                readze a1 4 r3 ; that's the SWrn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 4
-                readze a1 4 r6 ; that's the Srn neighbour
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 4
+                readze a1 4 r3 ; that's the Srn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
+; ------------------------------------------------------
         oddSW:
         cmpi r1 20320
         jumpif lt oddW
         jumpif gt oddS
             setctr a1 r2 ; reading the cell's state
-            readze a1 4 r6 ; |
-            cmpi r6 1 ; alive ?
+            readze a1 4 r3 ; |
+            cmpi r3 1 ; alive ?
             jumpif neq endOddLoop ; dead cell => nothing to do
-                leti r0 0x74000
-                setctr a1 r0 ; moving to the Srn neighbour (NW)
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                leti r4 0x74000
+                setctr a1 r4 ; moving to the Srn neighbour (NW)
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 4
-                readze a1 4 r6 ; that's the SErn neighbour
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 4
+                readze a1 4 r3 ; that's the SErn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 628
-                readze a1 4 r6 ; that's the SWrn neighbour
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 628
+                readze a1 4 r3 ; that's the SWrn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                leti r0 0x73AFF
-                setctr a1 r0 ; moving to the Nrn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                leti r4 0x73AFF
+                setctr a1 r4 ; moving to the Nrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 4
-                setctr a1 r0 ; NErn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 4
+                setctr a1 r4 ; NErn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 628
-                setctr a1 r0 ; NWrn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 628
+                setctr a1 r4 ; NWrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 8
-                readze a1 4 r6 ; Ern neighbour
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 8
+                readze a1 4 r3 ; Ern neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 628
-                setctr a1 r0 ; Wrn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 628
+                setctr a1 r4 ; Wrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
+; ------------------------------------------------------
         oddS:
         cmpi r1 20479
         jumpif gt oddSE
             setctr a1 r2 ; reading the cell's state
-            readze a1 4 r6 ; |
-            cmpi r6 1 ; alive ?
+            readze a1 4 r3 ; |
+            cmpi r3 1 ; alive ?
             jumpif neq endOddLoop ; dead cell => nothing to do
-                let r0 r2
-                sub2i r0 644 ;
-                setctr a1 r0 ; moving to the NWrn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                let r4 r2
+                sub2i r4 644 ;
+                setctr a1 r4 ; moving to the NWrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 4
-                readze a1 4 r6 ; that's the Nrn neighbour
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 4
+                readze a1 4 r3 ; that's the Nrn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 4
-                readze a1 4 r6 ; that's the NErn neighbour
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 4
+                readze a1 4 r3 ; that's the NErn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 628
-                setctr a1 r0 ; moving to the Wrn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 628
+                setctr a1 r4 ; moving to the Wrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 8
-                setctr a1 r0 ; Ern neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 8
+                setctr a1 r4 ; Ern neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                sub2i r0 20328
-                setctr a1 r0 ; jumping to SWrn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                sub2i r4 20328
+                setctr a1 r4 ; jumping to SWrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 4
-                readze a1 4 r6 ; Srn neighbour
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 4
+                readze a1 4 r3 ; Srn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 4
-                setctr a1 r0 ; SErn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 4
+                setctr a1 r4 ; SErn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
+; ------------------------------------------------------
         oddSE:
         cmpi r1 20479
         jumpif gt endOddTimeLoop
             setctr a1 r2 ; reading the cell's state
-            readze a1 4 r6 ; |
-            cmpi r6 1 ; alive ?
+            readze a1 4 r3 ; |
+            cmpi r3 1 ; alive ?
             jumpif neq endOddLoop ; dead cell => nothing to do
-                leti r0 0x74000
-                setctr a1 r0 ; moving to the SErn neighbour (NW)
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                leti r4 0x74000
+                setctr a1 r4 ; moving to the SErn neighbour (NW)
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 628
-                readze a1 4 r6 ; that's the SWrn neighbour
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 628
+                readze a1 4 r3 ; that's the SWrn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 4
-                readze a1 4 r6 ; that's the Srn neighbour
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 4
+                readze a1 4 r3 ; that's the Srn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                leti r0 0x73AFF
-                setctr a1 r0 ; moving to the NErn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                leti r4 0x73AFF
+                setctr a1 r4 ; moving to the NErn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 628
-                setctr a1 r0 ; NWrn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 628
+                setctr a1 r4 ; NWrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 4
-                setctr a1 r0 ; Nrn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 4
+                setctr a1 r4 ; Nrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 4
-                readze a1 4 r6 ; Ern neighbour
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 4
+                readze a1 4 r3 ; Ern neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
 
-                add2i r0 628
-                setctr a1 r0 ; Wrn neighbour
-                readze a1 4 r6
-                add2i r6 1
-                setctr a1 r0
-                write a1 4 r6
+                add2i r4 628
+                setctr a1 r4 ; Wrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+; ------------------------------------------------------
+        oddW:
+        ; calcul de r = r1 mod 160
+        ; q = r/160 = (r1/10) >> 4
+        ; en effet (r mod 10) < 16 donc (16r mod 160) < 160
+        ; donc ne fausse pas la division entière
+        ; donc r = r1 - (r1/10) >> 4
+        ; plus rapide à calculer que r1/160 directement
+        let r3 r1
+        leti r4 10
+    	leti r5 0
+        debutBoucle1:
+        	cmp r4 r3
+        	jumpif ge finBoucle1
+        	shift left r4 1
+        	jump debutBoucle1
+        finBoucle1:
+        	shift right r4 1
+        debutBoucle2:
+        	cmp r4 r1
+        	jumpif lt fin
+        	shift left r5 1
+        	cmp r4 r3
+        	jumpif gt label
+        	    add2i r5 1
+        			sub2 r3 r4
+        label:
+        	shift right r4 1
+        	jump debutBoucle2
+        fin:
+            shift right r5 4 ; /16
+            sub3 r3 r1 r5
+            ; ---------------------------------
+        cmpi r3 0
+        jumpif gt oddMiddle
+            setctr a1 r2 ; reading the cell's state
+            readze a1 4 r3 ; |
+            cmpi r3 1 ; alive ?
+            jumpif neq endOddLoop ; dead cell => nothing to do
+                let r4 r2
+                sub2i r4 640
+                setctr a1 r4 ; Nrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 4
+                readze a1 4 r3 ; NErn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 628
+                readze a1 4 r3 ; NWrn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 8
+                setctr a1 r4 ; Ern neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 628
+                setctr a1 r4 ; Wrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 4
+                write a1 4 r3 ; Srn neighbour
+
+                add2i r4 4
+                write a1 4 r3 ; SErn neighbour
+
+                add2i r4 628
+                setctr a1 r4 ; SWrn neighbour
+                write a1 4 r3
+
+; ------------------------------------------------------
+        oddMiddle:
+        cmpi r3 158
+        jumpif gt oddSE
+            setctr a1 r2 ; reading the cell's state
+            readze a1 4 r3 ; |
+            cmpi r3 1 ; alive ?
+            jumpif neq endOddLoop ; dead cell => nothing to do
+                let r4 r2
+                sub2i r4 644
+                setctr a1 r4 ; NWrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 4
+                readze a1 4 r3 ; Nrn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 4
+                readze a1 4 r3 ; NErn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 628
+                setctr a1 r4 ; Wrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 8
+                setctr a1 r4 ; Ern neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 628
+                setctr a1 r4 ; SWrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 4
+                readze a1 4 r3 ; Srn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                write a1 4 r3 ; SErn neighbour
+
+; ------------------------------------------------------
+        oddE:
+            setctr a1 r2 ; reading the cell's state
+            readze a1 4 r3 ; |
+            cmpi r3 1 ; alive ?
+            jumpif neq endOddLoop ; dead cell => nothing to do
+                let r4 r2
+                sub2i r4 1276
+                setctr a1 r4 ; NErn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 628
+                readze a1 4 r3 ; NWrn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 4
+                readze a1 4 r3 ; Nrn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 4
+                setctr a1 r4 ; Ern neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 628
+                setctr a1 r4 ; Wrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 4
+                setctr a1 r4 ; Srn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 628
+                readze a1 4 r3 ; SErn neighbour
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
+                add2i r4 4
+                setctr a1 r4 ; SWrn neighbour
+                readze a1 4 r3
+                add2i r3 1
+                setctr a1 r4
+                write a1 4 r3
+
 
     endOddLoop:
         add2i r1 1
+        add2i r2 4
         jump oddLoop
 
 endOddTimeLoop:
-
-evenTimeLoop:
-
-    setctr a0 r2 ; 1st cell
-    leti r1 0 ; cell counter
-
-    loop:
-    cmpi r1 20479 ; 20480 cells
-    jumpif gt endLoop
-
-        evenNW:
-            cmpi r1 0
-            jumpif gt N
-
-            setctr a1 r5
-
-timeLoop:
-
-    setctr a0 r2
-    leti r1 0 ; cell counter
-
-    loop:
-    cmpi r1 20479
-    jumpif gt endLoop
-
-        leti r6 0 ; alive neighbours counter
-
-        NW:
-        cmpi r1 1
-        jumpif gt N ; no neighbour is up-to-date
-
-            setctr a1 r3
-            readze a1 16 r7 ; NE cell state
-            and2i r7 0b10 ; is enough to know whether NE is alive
-            cmpi r7 10
-            jumpif nz 9
-                addi r6 1 ; 4+3+2 = 9 bits
-
-            setctr a1 r4
-            readze a1 16 r7 ; SW cell state
-            and2i r7 0b10
-            cmpi r7 10
-            jumpif nz 9
-                addi r6 1 ; 4+3+2 = 9 bits
-
-            leti r7 0x10010
-            setctr a1 r7
-            readze a1 16 r7 ; eastern cell state
-            and2i r7 0b10
-            cmpi r7 10
-            jumpif nz 9
-                addi r6 1 ; 4+3+2 = 9 bits
-
-            leti r7 0x10A00
-            setctr a1 r7
-            readze a1 16 r7 ; southern cell state
-            and2i r7 0b10
-            cmpi r7 10
-            jumpif nz 9
-                addi r6 1 ; 4+3+2 = 9 bits
-
-            readze a0 1 r7
-            cmpi r7 1
-            jumpif nz NWisDead
-                cmpi r6 1
-                jumpif z NWgonnaDie
-                    cmpi r6 3
-                    jumpif gt NWgonnaDie
-                        readze a0 14 r6 ; just to advance a0
-                        write a0 1 r0 ; NW hasn't changed
-                        jump endNW
-                NWgonnaDie:
-                    leti r6 0x10000
-                    setctr a0 r6
-                    write a0 16 r6
-                    jump endNW
-            NWisDead:
-                cmpi r6 3
-                jumpif nz NWstaysDead
-                    leti r6 0x10000
-                    setctr a0 r6
-                    leti r7 0x0FFFF
-                    write a0 16 r7
-                    jump endNW
-                NWstaysDead:
-                    readze a0 14 r6 ; just to advance a0
-                    write a0 1 r0
-            endNW:
-            add2i r1 1
-            jump loop
-
-        N:
-            cmpi r1 159
-            jumpif gt NE:
-
-        NE:
-            cmpi r1 160
-            jumpif gt SW:
-
-        SW:
-            cmpi r1 20320
-            jumpif gt S
-            jumpif lt W
-
-        SE:
-            cmpi r1 20479
-            jumpif lt S
-
-        S:
-
-
-        W:
-            ; cmpi r1 mod 160 0
-            cmpi r1
-            jumpif E
-
-        E:
-            ; cmpi r1 mod 160 159
-            cmpi r1
-            jumpif land
-
-        land:
-
-    endLoop:
-
-endTimeLoop:
