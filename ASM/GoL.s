@@ -23,6 +23,29 @@ GoL:
 ; + 0x14000 for the odd table
 
 
+
+; bud test
+
+leti r0 0x0000 ; black
+call clear_screen
+leti r7 0xffff ; white
+
+leti r1 0x60004
+setctr a0 r1
+write a0 4 r7 ; 0,1
+leti r1 0x60280
+setctr a0 r1
+write a0 4 r7 ; 1,0
+write a0 4 r7 ; 1,1
+write a0 4 r7 ; 1,2
+leti r1 0x60504
+setctr a0 r1
+write a0 4 r7 ; 2,1
+
+; ----------------------------------------------------------
+                        GameOfLife:
+; ----------------------------------------------------------
+
 push r0 ; side-effects prevention
 push r1
 push r2
