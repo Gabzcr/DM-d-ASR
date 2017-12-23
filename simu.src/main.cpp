@@ -36,7 +36,7 @@ bool cmdOptionExists(char** begin, char** end, const std::string& option) {
 }
 
 void usage() {
-		std::cerr << "Usage: simu [options] file.obj \n options : -d for debug, -s for step by step, -g for graphical screen" << std::endl;
+		std::cerr << "Usage: simu [options] file.obj \n options : -d for debug, -s for step by step, -g for graphical screen, --stats for statistics" << std::endl;
 		exit(0);
 }
 
