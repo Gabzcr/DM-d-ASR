@@ -17,13 +17,13 @@ Lorsqu'un `jump -13` est détecté, le processeur virtuel se ferme (Le fichier p
 Undertale
 ----------------------------------------------------------------------
 
-Un mini-jeu du genre _bullet hell_ est disponible. Ce mini-jeu est très largement inspiré du corps des combats du jeu Undertale (un jeu sorti en fin 2015 qui a été très apprécié dès sa sortie). 
+Un mini-jeu du genre _bullet hell_ est disponible. Ce mini-jeu est très largement inspiré du corps des combats du jeu Undertale (un jeu sorti en fin 2015 qui a été très apprécié dès sa sortie).
 Je vous encourage à aller voir cette [courte vidéo](https://www.youtube.com/watch?v=rJhX_-X6atk) (de 40s) pour avoir la référence.
 Pour le lancer, il suffit de taper la commande `./simu -g ASM/undertale.obj`.
 
-Le joueur contrôle un coeur avec les flèches du clavier et doit éviter toute collision avec les ennemis représentés par des petites bulles blanches. 
+Le joueur contrôle un coeur avec les flèches du clavier et doit éviter toute collision avec les ennemis représentés par des petites bulles blanches.
 Les ennemis se déplacent verticalement du haut vers le bas et horizontalement vers le coeur jusqu'à ce qu'ils aient dépassé le sprite du coeur.
-Quand un ennemi atteint le bas de l'écran, il est remplacé par un nouvel ennemi généré en haut de l'écran avec une abscisse aléatoire. 
+Quand un ennemi atteint le bas de l'écran, il est remplacé par un nouvel ennemi généré en haut de l'écran avec une abscisse aléatoire.
 Les premiers ennemis sont générés aléatoirement partout sur l'écran (pour que la répartition soit uniforme) mais assez loin du coeur pour éviter les _game overs_ instantannés en lançant le jeu.
 Les ennemis se déplacent deux fois plus lentement que le coeur controlé par le joueur pour rendre possible les esquives.
 Il y a un petit délai d'un peu moins d'une seconde au début du jeu pour laisser au joueur le temps de voir la position initiale des ennemis et de les éviter.
@@ -40,6 +40,7 @@ Voilà ce que j'aurais codé ensuite si j'avais eu plus de temps (dans l'ordre) 
 - une barre de vie qui diminue à chaque fois que le coeur prend un coup (au lieu du _game over_ direct)
 - une mesure du temps pendant lequel le joueur a survécu, affiché sur l'écran du _game over_
 - une diversification des ennemis
+
 et bien plus encore...
 
 ----------------------------------------------------------------------
@@ -60,6 +61,7 @@ Si j'avais déboggé mon programme et qu'il m'était resté du temps, voici ce q
 - plusieurs démonstrations à grand renfort de floraisons, parce que c'est très beau ;
 - des démonstrations avec des oscillateurs, des vaisseaux, des puffeurs, des canons (pas la peine de s'embêter à ajouter à cette liste les spacefillers puisque l'espace est torique) ;
 - un menu pour générer/sélectionner des configurations des types précédents ;
+
 et bien plus encore...
 
 
@@ -67,4 +69,3 @@ et bien plus encore...
 
 La démo graphique permettant de tester les fonctions `clear_screen`, `fill`, `draw` et `putchar` est disponible.
 Pour la lancer, il suffit de taper la commande `./simu -g ASM/routines.obj` dans un terminal.
-
