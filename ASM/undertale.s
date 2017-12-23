@@ -63,11 +63,10 @@ main:
     leti r0 0x7c00
     call sprite_coeur
     
-    leti r6 1 ; VITESSE DES ENNEMIS A AJUSTER ICI (nombre de tours d'attente entre chaque déplacement de 1 pixel, i.e leti r6 1 revient à diviser la vitesse des ennemis par 2)!!!
     sleep 900
     
     
-label2:
+main_boucle:
     
     push r1
     push r2
@@ -164,7 +163,7 @@ label2:
 
     let r2 r4
     let r1 r3
-    leti r6 2; on met r6 à un de plus car il est décrémenté juste derrière. VITESSE DES ENNEMIS A MODIFIER ICI AUSSI!!!
+    leti r6 2 ; VITESSE DES ENNEMIS A AJUSTER ICI!!! (nombre de tours d'attente entre chaque déplacement de 1 pixel, i.e leti r6 i revient à diviser la vitesse des ennemis par i)
     
     
     freeze_ennemis:
@@ -175,9 +174,9 @@ label2:
     setctr a0 r5
     readze a0 1 r4
     cmpi r4 1
-    jumpif neq label1 ; cas où r4 = 0 : on ne bouge pas le pixel
+    jumpif neq finUp ; cas où r4 = 0 : on ne bouge pas le pixel
     cmpi r2 21
-    jumpif eq label1 ; cas où le coeur est déjà tout en haut
+    jumpif eq finUp ; cas où le coeur est déjà tout en haut
        leti r0 0 ; pour effacer l'ancien emplacement du pixel
        call sprite_coeur
        leti r0 0x7c00
@@ -186,16 +185,16 @@ label2:
        setctr a0 r5 ; a0 avait été incrémenté lors de readze a0 1 r4
        leti r4 0
        write a0 1 r4 ; on réécris 0 en mémoire pour indiquer que l'action a été traitée
-    label1:
+    finUp:
     
     ; touche 'DOWN'
     add2i r5 1
     setctr a0 r5
     readze a0 1 r4
     cmpi r4 1
-    jumpif neq label3
+    jumpif neq finDown
     cmpi r2 103
-    jumpif eq label3
+    jumpif eq finDown
        leti r0 0
        call sprite_coeur
        leti r0 0x7c00
@@ -204,16 +203,16 @@ label2:
        setctr a0 r5
        leti r4 0
        write a0 1 r4
-    label3:
+    finDown:
     
     ; touche 'LEFT'
     add2i r5 1
     setctr a0 r5
     readze a0 1 r4
     cmpi r4 1
-    jumpif neq label4
+    jumpif neq finLeft
     cmpi r1 21
-    jumpif eq label4
+    jumpif eq finLeft
        leti r0 0
        call sprite_coeur
        leti r0 0x7c00
@@ -222,16 +221,16 @@ label2:
        setctr a0 r5
        leti r4 0
        write a0 1 r4
-    label4:
+    finLeft:
     
     ; touche 'RIGHT'
     add2i r5 1
     setctr a0 r5
     readze a0 1 r4
     cmpi r4 1
-    jumpif neq label5
+    jumpif neq finRight
     cmpi r1 135
-    jumpif eq label5
+    jumpif eq finRight
        leti r0 0
        call sprite_coeur
        leti r0 0x7c00
@@ -240,10 +239,10 @@ label2:
        setctr a0 r5
        leti r4 0
        write a0 1 r4
-    label5:
+    finRight:
     
-    sleep 19
-    jump label2
+    sleep 19 ; MODIFIEZ LA VITESSE DU PROCESSEUR ICI!!! (temps en ms pendant lequel le processeur est mis en pause entre chaque tour de boucle)
+    jump main_boucle
 
 
 ; plot_with_game_over
