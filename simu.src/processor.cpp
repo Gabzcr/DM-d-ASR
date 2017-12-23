@@ -680,7 +680,7 @@ void Processor::von_Neuman_step(bool debug, bool stats) {
 				int sign1 = (uop1 >> (WORDSIZE-1)) & 1;
 				int sign2 = (uop2 >> (WORDSIZE-1)) & 1;
 				int signres = (ur >> (WORDSIZE-1)) & 1;
-				vflag = ((sign1 == sign2) and (signres != sign1));
+				vflag = ((sign1 != sign2) and (signres != sign1));
 				statistiques[0b1110101]++;
 				break;
 			}
