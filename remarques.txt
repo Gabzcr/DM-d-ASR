@@ -1,13 +1,17 @@
-* Avec l'arrivée des routines graphiques on commence à ressentir violemment les limites de la boîte de registres à 8 entrées... Heureusement on a la pile qui est facile à utiliser pour mettre tous les registres à contribution tout en se prémunissant des effets de bords des routines. Néanmoins cela aurait été plus confortable avec 16 registres.
+* Avec l'arrivée des routines graphiques on commence à ressentir violemment les limites de la boîte de registres à 8 entrées... 
+Heureusement on a la pile qui est facile à utiliser pour mettre tous les registres à contribution tout en se prémunissant des effets de bords des routines. 
+Néanmoins cela aurait été plus confortable avec 16 registres.
 
 *   getctr a0 r5
     add2 r5 r7
     setctr a0 r5
-Je ne sais pas ce que vous en pensez mais je trouve un peu triste de devoir utiliser 3 opérations pour un simple décalage de l'addresse mémoire courante. Est-ce qu'on n'aurait pas pu se débrouiller autrement pour éviter de démultiplier le nombre d'opérations liées à l'accès à la mémoire, dont on a de plus en plus besoin ?
+Je ne sais pas ce que vous en pensez mais je trouve un peu triste de devoir utiliser 3 opérations pour un simple décalage de l'addresse mémoire courante. 
+Est-ce qu'on n'aurait pas pu se débrouiller autrement pour éviter de démultiplier le nombre d'opérations liées à l'accès à la mémoire, dont on a de plus en plus besoin ?
 
 L'ISA se contredit quant à l'utilisation des instructions push et pop (on a décidé de les coder sans *size* car on a toujours besoin de mettre de côté le registre en entier).
 
-Les bits de la mémoire sont écris et lus à l'envers par blocs de 64 bits. Ce n'est pas génant tant qu'on respecte ces conventions (ça ne se ressent pas au niveau du processeur) mais on doit inverser les pixels pour les rendre lisibles par SDL.
+Les bits de la mémoire sont écris et lus à l'envers par blocs de 64 bits. 
+Ce n'est pas génant tant qu'on respecte ces conventions (ça ne se ressent pas au niveau du processeur) mais on doit inverser les pixels pour les rendre lisibles par SDL.
 
 Le processeur lit les instructions et surtout les constantes bit par bit, ce serait plus performant de lire les données par paquets de bits.
 
