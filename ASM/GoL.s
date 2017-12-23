@@ -28,19 +28,32 @@ GoL:
 
 leti r0 0x0000 ; black
 ;call clear_screen
-leti r7 -1 ; white
+leti r7 0xFFFF ; white
+leti r6 1
 
+leti r1 0x60000
+setctr a0 r1
+leti r2 1
+clear_memory:
+cmpi r2 0x5000
+jumpif gt init
+  write a0 64 r0
+  add2i r2 16
+  jump clear_memory
+
+init:
 leti r1 0x60004
 setctr a0 r1
-write a0 4 r7 ; 0,1
+write a0 4 r6 ; 0,1
 leti r1 0x60280
 setctr a0 r1
-write a0 4 r7 ; 1,0
-write a0 4 r7 ; 1,1
-write a0 4 r7 ; 1,2
+write a0 4 r6 ; 1,0
+write a0 4 r6 ; 1,1
+write a0 4 r6 ; 1,2
 leti r1 0x60504
 setctr a0 r1
-write a0 4 r7 ; 2,1
+write a0 4 r6 ; 2,1
+leti r6 0b1111100000000000
 
 aa:
     leti r1 0
@@ -48,30 +61,29 @@ aa:
     setctr a0 r2 ; table
     leti r3 0x10000
     setctr a1 r3 ; screen
-    
-    sleep 999
 
     ab:
 
         add2i r1 1
-        cmpi r1 128
-        jumpif gt -16
+        cmpi r1 0x1E0
+        jumpif gt GameOfLife
             readze a0 4 r5
             cmpi r5 1
             jumpif neq ac
                 write a1 16 r7
                 jump ab
             ac:
-                getctr a0 r2
+                getctr a1 r2
                 add2i r2 16
-                setctr a0 r2
+                setctr a1 r2
+                ;write a1 16 r6
                 jump ab
-sleep 999
 
 ; ----------------------------------------------------------
                         GameOfLife:
 ; ----------------------------------------------------------
 
+sleep 999
 push r0 ; side-effects prevention
 push r1
 push r2
@@ -86,7 +98,7 @@ leti r7 0xffff ; white
 leti r6 0
 
 oddTimeLoop:
-
+    sleep 999
     leti r1 0 ; cell counter
     leti r2 0x60000
     setctr a0 r2 ; we're reading in the even table
@@ -126,6 +138,7 @@ oddTimeLoop:
                 add2i r4 628
                 setctr a1 r4 ; moving to the odd SWrn neighbour
                 write a1 4 r3
+                jump endOddLoop
 
         ; for these cells only the NErn, Ern and SErn cells
         ; can be modified directly, for the others we will
@@ -178,9 +191,10 @@ oddTimeLoop:
                 write a1 4 r3
 
                 write a1 4 r3 ; that's the SErn neighbour
+                jump endOddLoop
 
         oddNE: ; the NErn can still be modified directly
-        cmpi r1 126
+        cmpi r1 127
         jumpif gt oddSW
             setctr a1 r2 ; reading the cell's state
             readze a1 4 r3 ; |
@@ -235,6 +249,7 @@ oddTimeLoop:
                 add2i r3 1
                 setctr a1 r4
                 write a1 4 r3
+                jump endOddLoop
 
         oddSW:
         cmpi r1 20320
@@ -296,6 +311,7 @@ oddTimeLoop:
                 add2i r3 1
                 setctr a1 r4
                 write a1 4 r3
+                jump endOddLoop
 
         oddS:
         cmpi r1 20479
@@ -357,6 +373,7 @@ oddTimeLoop:
                 add2i r3 1
                 setctr a1 r4
                 write a1 4 r3
+                jump endOddLoop
 
         oddSE:
         cmpi r1 20479
@@ -417,6 +434,7 @@ oddTimeLoop:
                 add2i r3 1
                 setctr a1 r4
                 write a1 4 r3
+                jump endOddLoop
 
         oddW:
         ; calcul de r = r1 mod 160
@@ -427,7 +445,7 @@ oddTimeLoop:
         ; plus rapide à calculer que r1/160 directement
         let r3 r1
         leti r4 160
-    	leti r5 0
+    	  leti r5 0
         debutBoucle1:
         	cmp r4 r3
         	jumpif ge finBoucle1
@@ -497,6 +515,7 @@ oddTimeLoop:
                 add2i r4 628
                 setctr a1 r4 ; SWrn neighbour
                 write a1 4 r3
+                jump endOddLoop
 
         oddMiddle:
         cmpi r3 158
@@ -553,6 +572,7 @@ oddTimeLoop:
                 write a1 4 r3
 
                 write a1 4 r3 ; SErn neighbour
+                jump endOddLoop
 
         oddE:
             setctr a1 r2 ; reading the cell's state
@@ -625,12 +645,10 @@ endOddTimeLoop: ;every cell's neighbours number is up-to-date
     setctr a0 r2 ; table
     leti r3 0x10000
     setctr a1 r3 ; screen
-    
-    sleep 999
 
     oddLifeLoop:
-        cmpi r1 127
         getctr a0 r4
+        cmpi r1 0x4FFF
         jumpif gt evenTimeLoop
             readze a0 4 r5
             cmpi r5 3
@@ -644,13 +662,15 @@ endOddTimeLoop: ;every cell's neighbours number is up-to-date
             odd2neighbours: ; depends on whether the cell was alive
             cmpi r5 2
             jumpif neq oddDead
-                sub3i r5 r4 0x14000
+                ; sub3i r5 r4 0x14000
+                leti r5 0x14000
+                sub3 r5 r4 r5
                 setctr a0 r5
                 readze a0 4 r5
                 cmpi r5 1
                 jumpif neq oddDead
                     setctr a0 r4
-                    leti r5 1
+                    ;leti r5 1 // inutile car cette branche implique r5 == 1
                     write a0 4 r5
                     write a1 16 r7
                     add2i r1 1
@@ -667,7 +687,7 @@ endOddTimeLoop: ;every cell's neighbours number is up-to-date
 ; ------------------------------------------------------
 
 evenTimeLoop:
-
+    sleep 999
     leti r1 0 ; cell counter
     leti r2 0x74000
     setctr a0 r2 ; we're reading in the even table
@@ -707,6 +727,7 @@ evenTimeLoop:
                 add2i r4 628
                 setctr a1 r4 ; moving to the odd SWrn neighbour
                 write a1 4 r3
+                jump endEvenLoop
 
         ; for these cells only the NErn, Ern and SErn cells
         ; can be modified directly, for the others we will
@@ -759,9 +780,10 @@ evenTimeLoop:
                 write a1 4 r3
 
                 write a1 4 r3 ; that's the SErn neighbour
+                jump endEvenLoop
 
         evenNE: ; the NErn can still be modified directly
-        cmpi r1 126
+        cmpi r1 127
         jumpif gt evenSW
             setctr a1 r2 ; reading the cell's state
             readze a1 4 r3 ; |
@@ -816,6 +838,7 @@ evenTimeLoop:
                 add2i r3 1
                 setctr a1 r4
                 write a1 4 r3
+                jump endEvenLoop
 
         evenSW:
         cmpi r1 20320
@@ -877,6 +900,7 @@ evenTimeLoop:
                 add2i r3 1
                 setctr a1 r4
                 write a1 4 r3
+                jump endEvenLoop
 
         evenS:
         cmpi r1 20479
@@ -938,6 +962,7 @@ evenTimeLoop:
                 add2i r3 1
                 setctr a1 r4
                 write a1 4 r3
+                jump endEvenLoop
 
         evenSE:
         cmpi r1 20479
@@ -998,6 +1023,7 @@ evenTimeLoop:
                 add2i r3 1
                 setctr a1 r4
                 write a1 4 r3
+                jump endEvenLoop
 
         evenW:
         ; calcul de r = r1 mod 160
@@ -1073,10 +1099,11 @@ evenTimeLoop:
                 add2i r4 628
                 setctr a1 r4 ; SWrn neighbour
                 write a1 4 r3
+                jump endEvenLoop
 
         evenMiddle:
         cmpi r3 158
-        jumpif gt evenSE
+        jumpif gt evenE
             setctr a1 r2 ; reading the cell's state
             readze a1 4 r3 ; |
             cmpi r3 1 ; alive ?
@@ -1129,6 +1156,7 @@ evenTimeLoop:
                 write a1 4 r3
 
                 write a1 4 r3 ; SErn neighbour
+                jump endEvenLoop
 
         evenE:
             setctr a1 r2 ; reading the cell's state
@@ -1200,8 +1228,6 @@ endEvenTimeLoop:
     setctr a0 r2 ; table
     leti r3 0x10000
     setctr a1 r3 ; screen
-    
-    sleep 999
 
     evenLifeLoop:
         add2i r6 2
@@ -1209,8 +1235,8 @@ endEvenTimeLoop:
         jumpif lt 13
             jump -13
 
-        cmpi r1 127
         getctr a0 r4
+        cmpi r1 0x4FFF
         jumpif gt oddTimeLoop
             readze a0 4 r5
             cmpi r5 3
@@ -1230,7 +1256,7 @@ endEvenTimeLoop:
                 cmpi r5 1
                 jumpif neq evenDead
                     setctr a0 r4
-                    leti r5 1
+                    ;leti r5 1 // inutile car cette branche implique r5 == 1
                     write a0 4 r5
                     write a1 16 r7
                     add2i r1 1
@@ -1250,13 +1276,13 @@ endEvenTimeLoop:
 clear_screen:
 push r1 ; to prevent side-effects
 
-leti r1 0x10000
+leti r1 0
 setctr a0 r1
 
-; 160*128 = 0x5000 -> dernier pixel à 0x15000
+; 160*128 = 0x5000 -> dernier pixel à 0x4FFF
 
 clearSL:
-  cmpi r1 0x15000
+  cmpi r1 0x4FFF
   jumpif gt clearEL
   write a0 16 r0
   add2i r1 1
@@ -1264,5 +1290,3 @@ clearSL:
 clearEL:
   pop r3
   return
-
-

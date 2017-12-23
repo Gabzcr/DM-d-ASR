@@ -35,11 +35,31 @@ Il y a un petit délai d'un peu moins d'une seconde au début du jeu pour laisse
 
 Amusez-vous à tester différentes difficultés si vous voulez (beaucoup d'ennemis et peu de temps entre chaque tour de boucle (vitesse rapide) ou peu d'ennemis et une vitesse plus faible par exemple).
 
-Voilà ce que j'aurais codé ensuite si j'avais eu plus de temps (dans l'ordre):
+Voilà ce que j'aurais codé ensuite si j'avais eu plus de temps (dans l'ordre) :
 - un menu présentant plusieurs difficultés et qui ajuste le nombre d'ennemis et la vitesse du jeu selon la difficulé choisie
 - une barre de vie qui diminue à chaque fois que le coeur prend un coup (au lieu du _game over_ direct)
 - une mesure du temps pendant lequel le joueur a survécu, affiché sur l'écran du _game over_
 - une diversification des ennemis
+et bien plus encore...
+
+----------------------------------------------------------------------
+Jeu de la vie
+----------------------------------------------------------------------
+
+Le fameux automate cellulaire de John Horton Conway. L'espace est découpé en "cellules" qui à l'état initial (t = 0) sont soit vivantes, soit mortes.
+L'état d'une cellule au temps n+1 dépend de son état et de celui de ses huit voisines au temps n :
+- Si une cellule a exactement trois voisines vivantes au temps n, elle est vivante au temps n+1.
+- Une cellule vivante qui a deux voisines vivantes au temps n reste vivante au temps n+1.
+- Toute cellule possédant une seule voisine vivante ou strictement plus de trois voisines vivantes au temps n meurt (ou reste morte le cas échéant) au temps n+1.
+Par ailleurs j'ai codé un jeu de la vie torique.
+
+Malheureusement, je n'ai pas réussi à débogger mon programme à ce jour. Vous pouvez cependant le tester en tapant `./simu -g ASM/GoL.obj` et vérifier que bien qu'il ne marche pas, il ne plante pas non plus, ce qui est déjà un net progrès par rapport à la précédente version qui subissait une *segmentation fault (core dumped)*... *(tousse)*
+Comme je peux me montrer très obstiné, je vais essayer d'achever le déboggage dans les jours qui viennent de vous envoyer une version fonctionnelle. Libre à vous de le prendre ou non en compte, de toute manière ce sera toujours une satisfaction personnelle si j'arrive à en venir à bout.
+
+Si j'avais déboggé mon programme et qu'il m'était resté du temps, voici ce que j'aurais codé ensuite (dans l'ordre) :
+- plusieurs démonstrations à grand renfort de floraisons, parce que c'est très beau ;
+- des démonstrations avec des oscillateurs, des vaisseaux, des puffeurs, des canons (pas la peine de s'embêter à ajouter à cette liste les spacefillers puisque l'espace est torique) ;
+- un menu pour générer/sélectionner des configurations des types précédents ;
 et bien plus encore...
 
 
