@@ -55,7 +55,7 @@ L'état d'une cellule au temps n+1 dépend de son état et de celui de ses huit 
 Par ailleurs j'ai codé un jeu de la vie torique.
 
 Malheureusement, je n'ai pas réussi à débogger mon programme à ce jour. Vous pouvez cependant le tester en tapant `./simu -g ASM/GoL.obj` et vérifier que bien qu'il ne marche pas, il ne plante pas non plus, ce qui est déjà un net progrès par rapport à la précédente version qui subissait une *segmentation fault (core dumped)*... *(tousse)*
-Comme je peux me montrer très obstiné, je vais essayer d'achever le déboggage dans les jours qui viennent de vous envoyer une version fonctionnelle. Libre à vous de le prendre ou non en compte, de toute manière ce sera toujours une satisfaction personnelle si j'arrive à en venir à bout.
+Comme je peux me montrer très obstiné, je vais essayer d'achever le déboggage dans les jours qui viennent de vous envoyer une version fonctionnelle avec une petite démonstration de floraison à partir d'un motif simple. Libre à vous de le prendre ou non en compte, de toute manière ce sera toujours une satisfaction personnelle si j'arrive à en venir à bout.
 
 Si j'avais déboggé mon programme et qu'il m'était resté du temps, voici ce que j'aurais codé ensuite (dans l'ordre) :
 - plusieurs démonstrations à grand renfort de floraisons, parce que c'est très beau ;
