@@ -269,8 +269,8 @@ return
 
 
 
-
 game_over:
+    sleep 900
     leti r0 0
     call clear_screen
     leti r0 -1
