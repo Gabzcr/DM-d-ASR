@@ -96,6 +96,8 @@ main:
     leti r3 110
     call putchar
 
+    sleep 999
+    sleep 999
     jump -13
 
 
